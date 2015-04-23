@@ -1,0 +1,27 @@
+{
+  "name": "three-dxf",
+  "main": "three-dxf.js",
+  "version": "0.0.1",
+  "authors": [
+    "GDS Storefront Estimating (gdsestimating.com)"
+  ],
+  "description": "A dxf viewer for the browser using three.js.",
+  "keywords": [
+    "dxf",
+    "cad",
+    "viewer"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/gdsestimating/three-dxf",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "https://code.jquery.com/jquery-2.1.3.min.js",
+    "threejs": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"
+  }
+}
