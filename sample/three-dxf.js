@@ -138,8 +138,8 @@ function ThreeDxfViewer(data, parent, width, height) {
 		var $el = $(renderer.domElement);
 
 		var vector = new THREE.Vector3(
-			( (event.pageX - $el.offset().left) / $el.innerWidth() ) * 2 - 1,
-			-( (event.pageY - $el.offset().top) / $el.innerHeight() ) * 2 + 1,
+				( (event.pageX - $el.offset().left) / $el.innerWidth() ) * 2 - 1,
+				-( (event.pageY - $el.offset().top) / $el.innerHeight() ) * 2 + 1,
 			0.5);
 		var projector = new THREE.Projector();
 		projector.unprojectVector(vector, camera);
@@ -396,7 +396,7 @@ function ThreeDxfViewer(data, parent, width, height) {
 			'uniform vec3 diffuse;',
 			'uniform float opacity;',
 
-			'uniform float pattern[' + pattern.length + '];',
+				'uniform float pattern[' + pattern.length + '];',
 			'uniform float patternLength;',
 
 			'varying float vLineDistance;',
@@ -408,7 +408,7 @@ function ThreeDxfViewer(data, parent, width, height) {
 
 			'float pos = mod(vLineDistance, patternLength);',
 
-			'for ( int i = 0; i < ' + pattern.length + '; i++ ) {',
+				'for ( int i = 0; i < ' + pattern.length + '; i++ ) {',
 			'pos = pos - abs(pattern[i]);',
 			'if( pos < 0.0 ) {',
 			'if( pattern[i] > 0.0 ) {',

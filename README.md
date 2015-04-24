@@ -6,14 +6,24 @@
 
 #### Install
 ```
-bower install three-dxf
+// Coming soon
+//bower install three-dxf
 ```
 
-#### Usage
+For now we recommend cloning the repo, and starting with our sample. See **Run Samples** below.
 
+#### Usage
+TODO
 
 #### Run Samples
+```
+> npm install -g http-server
+> cd sample
+> http-server .
+# use `http-server -c-1 .` to prevent caching
+```
 
+After performing the steps above, you can see the example at [http://localhost:8080](http://localhost:8080). You can use the dxf file included in the sample.
 
 #### Current Version v0.0.1
 Supports:
@@ -31,7 +41,7 @@ Does not yet support:
 * other less common objects and entities.
 
 #### Run Tests
-
+TODO
 
 #### Contributors
 bzuillsmith@gdsestimating.com

@@ -23,6 +23,7 @@
   "devDependencies": {
   },
   "dependencies": {
+    "dxf-parser": "^0.1.1"
   },
   "keywords": [
     "dxf",
