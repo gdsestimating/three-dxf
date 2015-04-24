@@ -23,7 +23,7 @@ TODO
 # use `http-server -c-1 .` to prevent caching
 ```
 
-After performing the steps above, you can see the example at [http://localhost:8080](http://localhost:8080). You can use the dxf file included in the sample.
+After performing the steps above, you can see the example at localhost:8080. You can use the dxf file included in the sample.
 
 #### Current Version v0.0.1
 Supports:
