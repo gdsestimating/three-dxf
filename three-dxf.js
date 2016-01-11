@@ -11,8 +11,7 @@ THREE.Math.angle2 = function(p1, p2) {
 	var v1 = new THREE.Vector2(p1.x, p1.y);
 	var v2 = new THREE.Vector2(p2.x, p2.y);
 	v2.sub(v1); // sets v2 to be our chord
-	v2.normalize(); // normalize because cos(theta) =
-	// if(v2.y < 0) return Math.PI + (Math.PI - Math.acos(v2.x));
+	v2.normalize();
 	if(v2.y < 0) return -Math.acos(v2.x);
 	return Math.acos(v2.x);
 };
@@ -77,7 +76,6 @@ THREE.BulgeGeometry.prototype = Object.create( THREE.Geometry.prototype );
  * @constructor
  */
 function ThreeDxfViewer(data, parent, width, height) {
-	var self = this;
 	var $parent = $(parent);
 
 	var scene = new THREE.Scene();
@@ -87,12 +85,9 @@ function ThreeDxfViewer(data, parent, width, height) {
 	var viewSize = 30;
 	var camera = new THREE.OrthographicCamera(viewSize * aspectRatio / -2, viewSize * aspectRatio / 2, viewSize / 2, viewSize / -2, 1, 19);
 	camera.position.z = 10;
-	camera.position.x = 570;
-	camera.position.y = 335;
-	// camera.position.x = 0;
-	// camera.position.y = 0;
+	camera.position.x = 0;
+	camera.position.y = 0;
 
-//	var renderer = this.renderer = new THREE.CanvasRenderer();
 	var renderer = this.renderer = new THREE.WebGLRenderer();
 	renderer.setSize(width, height);
 	renderer.setClearColor(0xfffffff, 1);
@@ -116,7 +111,7 @@ function ThreeDxfViewer(data, parent, width, height) {
 		if(entity.type === 'DIMENSION') {
 			if(entity.block) {
 				var block = data.blocks[entity.block];
-				for(j = 0; j < block.entities.length; j++) {
+				for(var j = 0; j < block.entities.length; j++) {
 					drawEntity(block.entities[j], data);
 				}
 			} else {
@@ -262,8 +257,8 @@ function ThreeDxfViewer(data, parent, width, height) {
 	}
 
 	function drawSolid(entity, data) {
-		var material, mesh, solid, verts;
-		geometry = new THREE.Geometry();
+		var material, mesh, verts,
+		    geometry = new THREE.Geometry();
 
 		verts = geometry.vertices;
 		verts.push(new THREE.Vector3(entity.points[0].x, entity.points[0].y, entity.points[0].z));
