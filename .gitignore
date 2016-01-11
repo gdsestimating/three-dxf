@@ -3,5 +3,4 @@ node_modules/
 private/
 typings/
 build/
-src/
 .vscode/
