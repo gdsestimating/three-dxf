@@ -6,8 +6,7 @@
 
 #### Install
 ```
-// Coming soon
-//bower install three-dxf
+bower install three-dxf
 ```
 
 For now we recommend cloning the repo, and starting with our sample. See **Run Samples** below.
@@ -17,21 +16,23 @@ TODO
 
 #### Run Samples
 ```
-> npm install -g http-server
 > cd sample
+> bower install
+> npm install -g http-server
 > http-server .
 # use `http-server -c-1 .` to prevent caching
 ```
 
 After performing the steps above, you can see the example at localhost:8080. You can use the dxf file included in the sample.
 
-#### Current Version v0.0.1
+#### Current Version v0.1.0
 Supports:
-* Headers
-* Most Simple entities (lines, polylines, circles, etc)
+* Header
+* Most LW entities (lines, polylines, circles, etc)
 * Layers
 * Some support for line types
 * Simple Text
+* Viewport
  
 Does not yet support:
 * Attributes
@@ -39,9 +40,6 @@ Does not yet support:
 * All types of Leaders
 * MText
 * other less common objects and entities.
-
-#### Run Tests
-TODO
 
 #### Contributors
 bzuillsmith@gmail.com
