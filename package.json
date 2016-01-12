@@ -20,10 +20,8 @@
     "Ben Zuill-Smith <bzuillsmith@gmail.com>"
   ],
   "license": "MIT",
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "dependencies": {
-    "dxf-parser": "^0.1.1"
   },
   "keywords": [
     "dxf",

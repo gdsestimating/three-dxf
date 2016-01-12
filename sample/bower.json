@@ -1,0 +1,30 @@
+{
+  "name": "three-dxf-sample",
+  "main": "index.js",
+  "homepage": "https://github.com/gdsestimating/three-dxf",
+  "authors": [
+    "gdsestimating.com"
+  ],
+  "description": "example project of using the three-dxf cad viewer",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "dxf",
+    "cad",
+    "threejs"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.2.0",
+    "three.js": "~0.73.0",
+    "dxf-parser": "~0.4.2"
+  }
+}

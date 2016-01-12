@@ -74,7 +74,7 @@ function onSuccess(evt){
     setTimeout(function() { $progress.removeClass('loading'); }, 2000);
     var parser = new window.DxfParser();
     var dxf = parser.parseSync(fileReader.result);
-    cadCanvas = new ThreeDxfViewer(dxf, document.getElementById('cad-view'), 400, 400);
+    cadCanvas = new ThreeDxf.Viewer(dxf, document.getElementById('cad-view'), 400, 400);
 }
 
 function handleDragOver(evt) {

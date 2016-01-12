@@ -1,7 +1,8 @@
 {
   "name": "three-dxf",
-  "main": "three-dxf.js",
-  "version": "0.0.1",
+  "main": "dist/three-dxf.js",
+  "version": "0.1.0",
+  "package": "git@github.com:gdsestimating/three-dxf.git",
   "authors": [
     "GDS Storefront Estimating (gdsestimating.com)"
   ],
@@ -18,8 +19,11 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
+    "package.json",
+    "sample"
   ],
   "dependencies": {
+    "three.js": "~0.73.0"
   }
 }
