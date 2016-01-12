@@ -25,6 +25,7 @@
   "dependencies": {
     "jquery": "~2.2.0",
     "three.js": "~0.73.0",
-    "dxf-parser": "~0.4.2"
+    "dxf-parser": "~0.4.2",
+    "three-dxf": "~0.1.0"
   }
 }
