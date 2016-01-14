@@ -1,4 +1,4 @@
-//three-dxf v0.1.0
+//three-dxf v0.1.1
 
 /**
  * Returns the angle in radians of the vector (p1,p2). In other words, imagine
@@ -238,8 +238,7 @@ var ThreeDxf;
                 ( (event.pageX - $el.offset().left) / $el.innerWidth() ) * 2 - 1,
                 -( (event.pageY - $el.offset().top) / $el.innerHeight() ) * 2 + 1,
                 0.5);
-            var projector = new THREE.Projector();
-            projector.unprojectVector(vector, camera);
+            vector.unproject(camera);
 
             var dir = vector.sub(camera.position).normalize();
 
