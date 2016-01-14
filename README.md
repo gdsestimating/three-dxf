@@ -6,8 +6,7 @@
 
 #### Install
 ```
-// Coming soon
-//bower install three-dxf
+bower install three-dxf
 ```
 
 For now we recommend cloning the repo, and starting with our sample. See **Run Samples** below.
@@ -25,7 +24,7 @@ TODO
 
 After performing the steps above, you can see the example at localhost:8080. You can use the dxf file included in the sample.
 
-#### Current Version v0.0.1
+#### Current Version v0.1.1
 Supports:
 * Headers
 * Most Simple entities (lines, polylines, circles, etc)
