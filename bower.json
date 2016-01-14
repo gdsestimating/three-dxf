@@ -2,7 +2,6 @@
   "name": "three-dxf",
   "main": "dist/three-dxf.js",
   "version": "0.1.1",
-  "package": "git@github.com:gdsestimating/three-dxf.git",
   "authors": [
     "GDS Storefront Estimating (gdsestimating.com)"
   ],
