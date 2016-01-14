@@ -273,7 +273,7 @@ var ThreeDxf;
         function drawEntity(entity, data) {
             if(entity.type === 'CIRCLE' || entity.type === 'ARC') {
                 drawCircle(entity, data);
-            } else if(entity.type === 'LWPOLYLINE' || entity.type === 'LINE') {
+            } else if(entity.type === 'LWPOLYLINE' || entity.type === 'LINE' || entity.type === 'POLYLINE') {
                 drawLine(entity, data);
             } else if(entity.type === 'TEXT') {
                 drawText(entity, data);
@@ -341,7 +341,7 @@ var ThreeDxf;
             line = new THREE.Line(geometry, material);
             scene.add(line);
         }
-
+        
         function drawCircle(entity, data) {
             var geometry, material, circle;
 
@@ -432,8 +432,12 @@ var ThreeDxf;
         }
 
         function getColor(entity, data) {
-            var color = entity.color || data.tables.layer.layers[entity.layer].color;
-            if(color === 0xffffff) {
+            var color = 0x000000; //default
+            if(entity.color) color = entity.color;
+            else if(data.tables && data.tables.layer && data.tables.layer.layers[entity.layer])
+                color = data.tables.layer.layers[entity.layer].color;
+                
+            if(color == null || color === 0xffffff) {
                 color = 0x000000;
             }
             return color;
@@ -441,6 +445,7 @@ var ThreeDxf;
 
         function createLineTypeShaders(data) {
             var ltype, type;
+            if(!data.tables || !data.tables.lineType) return;
             var ltypes = data.tables.lineType.lineTypes;
 
             for(type in ltypes) {
