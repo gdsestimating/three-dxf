@@ -30,7 +30,9 @@ cadCanvas = new ThreeDxf.Viewer(dxf, document.getElementById('cad-view'), 400, 4
 
 After performing the steps above, you can see the example at localhost:8080. You can use the dxf file included in the sample.
 
-#### Current Version v0.1.1
+Note that the sample contains some three.js extras for Text support. If you wish to view text in DXF files, you will need those extras.
+
+#### Supported DXF Features
 Supports:
 * Header
 * Most LW entities (lines, polylines, circles, etc)
