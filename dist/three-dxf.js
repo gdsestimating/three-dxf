@@ -393,6 +393,9 @@ var ThreeDxf;
         function drawText(entity, data) {
             var geometry, material, text;
 
+            if(!THREE.TextGeometry)
+                return console.warn('Text is not supported without the Three.js FontUtils and TextGeometry extras!');
+            
             geometry = new THREE.TextGeometry(entity.text, { height: 0, size: entity.textHeight || 12 });
 
             material = new THREE.MeshBasicMaterial({ color: getColor(entity, data) });
