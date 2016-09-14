@@ -169,9 +169,10 @@ var ThreeDxf;
      * @param {Object} parent - the parent element to which we attach the rendering canvas
      * @param {Number} width - width of the rendering canvas in pixels
      * @param {Number} height - height of the rendering canvas in pixels
+     * @param {Object} font - a font loaded with THREE.FontLoader 
      * @constructor
      */
-    ThreeDxf.Viewer = function(data, parent, width, height) {
+    ThreeDxf.Viewer = function(data, parent, width, height, font) {
         var $parent = $(parent);
 
         var scene = new THREE.Scene();
@@ -393,10 +394,10 @@ var ThreeDxf;
         function drawText(entity, data) {
             var geometry, material, text;
 
-            if(!THREE.TextGeometry)
-                return console.warn('Text is not supported without the Three.js FontUtils and TextGeometry extras!');
+            if(!font)
+                return console.warn('Text is not supported without a Three.js font loaded with THREE.FontLoader! Load a font of your choice and pass this into the constructor. See the sample for this repository or Three.js examples at http://threejs.org/examples/?q=text#webgl_geometry_text for more details.');
             
-            geometry = new THREE.TextGeometry(entity.text, { height: 0, size: entity.textHeight || 12 });
+            geometry = new THREE.TextGeometry(entity.text, { font: font, height: 0, size: entity.textHeight || 12 });
 
             material = new THREE.MeshBasicMaterial({ color: getColor(entity, data) });
 
@@ -428,8 +429,8 @@ var ThreeDxf;
             geometry.colors = colors;
             geometry.computeBoundingBox();
 
-            material = new THREE.PointCloudMaterial( { size: 0.05, vertexColors: THREE.VertexColors } );
-            point = new THREE.PointCloud(geometry, material);
+            material = new THREE.PointsMaterial( { size: 0.05, vertexColors: THREE.VertexColors } );
+            point = new THREE.Points(geometry, material);
             scene.add(point);
         }
 

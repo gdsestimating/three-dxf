@@ -74,7 +74,17 @@ function onSuccess(evt){
     setTimeout(function() { $progress.removeClass('loading'); }, 2000);
     var parser = new window.DxfParser();
     var dxf = parser.parseSync(fileReader.result);
-    cadCanvas = new ThreeDxf.Viewer(dxf, document.getElementById('cad-view'), 400, 400);
+    
+    // Three.js changed the way fonts are loaded, and now we need to use FontLoader to load a font
+    //  and enable TextGeometry. See this example http://threejs.org/examples/?q=text#webgl_geometry_text
+    //  and this discussion https://github.com/mrdoob/three.js/issues/7398 
+    var font;
+    var loader = new THREE.FontLoader();
+    loader.load( 'fonts/helvetiker_regular.typeface.json', function ( response ) {
+        font = response;
+        cadCanvas = new ThreeDxf.Viewer(dxf, document.getElementById('cad-view'), 400, 400, font);
+    });
+    
 }
 
 function handleDragOver(evt) {
