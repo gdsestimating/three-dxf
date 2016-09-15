@@ -1,4 +1,4 @@
-//three-dxf v0.1.1
+//three-dxf v0.2.1
 
 /**
  * Returns the angle in radians of the vector (p1,p2). In other words, imagine
@@ -202,7 +202,7 @@ var ThreeDxf;
 
         createLineTypeShaders(data);
 
-        var i, entity;
+        var i, entity, obj;
 
         for(i = 0; i < data.entities.length; i++) {
             entity = data.entities[i];
@@ -211,18 +211,21 @@ var ThreeDxf;
                 if(entity.block) {
                     var block = data.blocks[entity.block];
                     if(!block) {
-                        console.error('Missing block reference "' + entity.block + '"');
+                        console.error('Missing referenced block "' + entity.block + '"');
                         continue;
                     }
                     for(var j = 0; j < block.entities.length; j++) {
-                        drawEntity(block.entities[j], data);
+                        obj = drawEntity(block.entities[j], data);
                     }
                 } else {
                     console.log('WARNING: No block for DIMENSION entity');
                 }
             } else {
-                drawEntity(entity, data);
+                obj = drawEntity(entity, data);
             }
+
+            if(obj) scene.add(obj);
+            obj = null;
         }
 
         this.render = function() {
@@ -271,17 +274,21 @@ var ThreeDxf;
         };
 
         function drawEntity(entity, data) {
+            var mesh;
             if(entity.type === 'CIRCLE' || entity.type === 'ARC') {
-                drawCircle(entity, data);
+                mesh = drawCircle(entity, data);
             } else if(entity.type === 'LWPOLYLINE' || entity.type === 'LINE' || entity.type === 'POLYLINE') {
-                drawLine(entity, data);
+                mesh = drawLine(entity, data);
             } else if(entity.type === 'TEXT') {
-                drawText(entity, data);
+                mesh = drawText(entity, data);
             } else if(entity.type === 'SOLID') {
-                drawSolid(entity, data);
+                mesh = drawSolid(entity, data);
             } else if(entity.type === 'POINT') {
-                drawPoint(entity, data);
+                mesh = drawPoint(entity, data);
+            } else if(entity.type === 'INSERT') {
+                mesh = drawBlock(entity, data);
             }
+            return mesh;
         }
 
         function drawLine(entity, data) {
@@ -339,7 +346,7 @@ var ThreeDxf;
             // }
 
             line = new THREE.Line(geometry, material);
-            scene.add(line);
+            return line;
         }
         
         function drawCircle(entity, data) {
@@ -355,7 +362,7 @@ var ThreeDxf;
             circle.position.y = entity.center.y;
             circle.position.z = entity.center.z;
 
-            scene.add(circle);
+            return circle;
         }
 
         function drawSolid(entity, data) {
@@ -387,8 +394,8 @@ var ThreeDxf;
 
             material = new THREE.MeshBasicMaterial({ color: getColor(entity, data) });
 
-            mesh = new THREE.Mesh(geometry, material);
-            scene.add(mesh);
+            return new THREE.Mesh(geometry, material);
+            
         }
 
         function drawText(entity, data) {
@@ -406,7 +413,7 @@ var ThreeDxf;
             text.position.y = entity.startPoint.y;
             text.position.z = entity.startPoint.z;
 
-            scene.add(text);
+            return text;
         }
 
         function drawPoint(entity, data) {
@@ -432,6 +439,32 @@ var ThreeDxf;
             material = new THREE.PointsMaterial( { size: 0.05, vertexColors: THREE.VertexColors } );
             point = new THREE.Points(geometry, material);
             scene.add(point);
+        }
+
+        function drawBlock(entity, data) {
+            var block = data.blocks[entity.name];
+            
+            var group = new THREE.Object3D()
+            
+            if(entity.xScale) group.scale.x = entity.xScale;
+            if(entity.yScale) group.scale.y = entity.yScale;
+
+            if(entity.rotation) {
+                group.rotation.z = entity.rotation * Math.PI / 180;
+            }
+
+            if(entity.position) {
+                group.position.x = entity.position.x;
+                group.position.y = entity.position.y;
+                group.position.z = entity.position.z;
+            }
+            
+            for(var i = 0; i < block.entities.length; i++) {
+                var childEntity = drawEntity(block.entities[i], data, group);
+                if(childEntity) group.add(childEntity);
+            }
+
+            return group;
         }
 
         function getColor(entity, data) {
