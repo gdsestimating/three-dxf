@@ -76,48 +76,30 @@ var ThreeDxf;
         
         var RENDER_MODE_2D = 0;
         
+        Helpers.findExtents = function(scene) {
+            var box = new THREE.Box3().setFromObject(scene);
+
+            return box;
+        },
+
         /**
          * 
-         * @param {object} dxf - the full dxf object
          * @param {number} aspectRatio - the aspect ratio of the view we are geting the initial camera position for 
+         * @param {Scene} scene - the three js scene object holding all entities of the dxf drawing
          */
-        Helpers.getCameraParametersFromDxf = function(dxf, aspectRatio) {
+        Helpers.getCameraParametersFromScene = function(aspectRatio, scene) {
             var upperRightCorner, lowerLeftCorner, center,
-                dxfAspectRatio, vpUpperRightCorner, vpLowerLeftCorner,
+                extentsAspectRatio, vpUpperRightCorner, vpLowerLeftCorner,
                 width, height, header, i, viewports, viewport,
                 dir;
             
-            // First try the viewport table
-            if (!upperRightCorner && dxf.tables && dxf.tables.viewPort) {
-                viewports = dxf.tables.viewPort.viewPorts;
-                for(i in viewports) {
-                    viewport = viewports[i];
-                    
-                    // If this is a 2D front-facing viewport, use the viewport values
-                    dir = viewport.viewDirectionFromTarget;
-                    if(viewport.center && 
-                        (viewport.renderMode === RENDER_MODE_2D ||
-                        (dir && dir.x === 0 && dir.y === 0 && dir.z === 1))) {
-                        center = viewport.center;
-                        vpUpperRightCorner = viewport.upperRightCorner;
-                        vpLowerLeftCorner = viewport.lowerLeftCorner;
-                        
-                        upperRightCorner = { x: vpUpperRightCorner.x, y: vpUpperRightCorner.y };
-                        lowerLeftCorner = { x: vpLowerLeftCorner.x, y: vpLowerLeftCorner.y };
-                        break;
-                    }
-                }
+            var extents;
+            if(scene) {
+                extents = Helpers.findExtents(scene);
+                upperRightCorner = { x: extents.max.x, y: extents.min.y }
+                lowerLeftCorner = { x: extents.min.x, y: extents.max.y }
             }
-            
-            // Second try header for extents
-            if(!upperRightCorner && dxf.header) {
-                header = dxf.header;
-                if(header.$EXTMIN && header.$EXTMAX) {
-                    upperRightCorner = header.$EXTMAX;
-                    lowerLeftCorner = header.$EXTMIN;
-                }
-            }
-            
+
             // If nothing found in dxf, use some abitrary defaults
             if(!lowerLeftCorner || !upperRightCorner) {
                 var halfWidth = 15 * aspectRatio;
@@ -139,10 +121,10 @@ var ThreeDxf;
                 x: width / 2 + lowerLeftCorner.x,
                 y: height / 2 + lowerLeftCorner.y
             };
-            console.log(lowerLeftCorner, upperRightCorner, center);
-            // fit DXF ViewPort into current ThreeDXF viewer
-            dxfAspectRatio = width / height;
-            if(aspectRatio > dxfAspectRatio) {
+
+            // fit all objects into current ThreeDXF viewer
+            extentsAspectRatio = Math.abs(width / height);
+            if(aspectRatio > extentsAspectRatio) {
                 width = height * aspectRatio;
             } else {
                 height = width / aspectRatio;
@@ -175,35 +157,12 @@ var ThreeDxf;
     ThreeDxf.Viewer = function(data, parent, width, height, font) {
         var $parent = $(parent);
 
-        var scene = new THREE.Scene();
-        width = width || $parent.innerWidth();
-        height = height || $parent.innerHeight();
-        var aspectRatio = width / height;
-        
-        var viewPort = Helpers.getCameraParametersFromDxf(data, aspectRatio);
-        
-        var camera = new THREE.OrthographicCamera(viewPort.left, viewPort.right, viewPort.top, viewPort.bottom, 1, 19);
-        camera.position.z = 10;
-        camera.position.x = viewPort.center.x;
-        camera.position.y = viewPort.center.y;
-
-        var renderer = this.renderer = new THREE.WebGLRenderer();
-        renderer.setSize(width, height);
-        renderer.setClearColor(0xfffffff, 1);
-
-        $parent.append(renderer.domElement);
-        $parent.show();
-
-        var controls = new THREE.OrbitControls(camera, parent);
-        controls.target.x = camera.position.x;
-        controls.target.y = camera.position.y;
-        controls.target.z = 0;
-        controls.zoomSpeed = 3;
-
         createLineTypeShaders(data);
 
-        var i, entity, obj;
+        var scene = new THREE.Scene();
 
+        // Create scene from dxf object (data)
+        var i, entity, obj;
         for(i = 0; i < data.entities.length; i++) {
             entity = data.entities[i];
 
@@ -227,6 +186,32 @@ var ThreeDxf;
             if(obj) scene.add(obj);
             obj = null;
         }
+
+
+        width = width || $parent.innerWidth();
+        height = height || $parent.innerHeight();
+        var aspectRatio = width / height;
+        
+        var viewPort = Helpers.getCameraParametersFromScene(aspectRatio, scene);
+        
+        var camera = new THREE.OrthographicCamera(viewPort.left, viewPort.right, viewPort.top, viewPort.bottom, 1, 19);
+        camera.position.z = 10;
+        camera.position.x = viewPort.center.x;
+        camera.position.y = viewPort.center.y;
+
+        var renderer = this.renderer = new THREE.WebGLRenderer();
+        renderer.setSize(width, height);
+        renderer.setClearColor(0xfffffff, 1);
+
+        $parent.append(renderer.domElement);
+        $parent.show();
+
+        var controls = new THREE.OrbitControls(camera, parent);
+        controls.target.x = camera.position.x;
+        controls.target.y = camera.position.y;
+        controls.target.z = 0;
+        controls.zoomSpeed = 3;
+
 
         this.render = function() {
             renderer.render(scene, camera);
@@ -565,6 +550,20 @@ var ThreeDxf;
             ].join('\n');
 
             return dashedLineShader;
+        }
+
+        function findExtents(scene) { 
+            for(var child of scene.children) {
+                var minX, maxX, minY, maxY;
+                if(child.position) {
+                    minX = Math.min(child.position.x, minX);
+                    minY = Math.min(child.position.y, minY);
+                    maxX = Math.max(child.position.x, maxX);
+                    maxY = Math.max(child.position.y, maxY);
+                }
+            }
+
+            return { min: { x: minX, y: minY }, max: { x: maxX, y: maxY }};
         }
 
     }
