@@ -96,8 +96,8 @@ var ThreeDxf;
             var extents;
             if(scene) {
                 extents = Helpers.findExtents(scene);
-                upperRightCorner = { x: extents.max.x, y: extents.min.y }
-                lowerLeftCorner = { x: extents.min.x, y: extents.max.y }
+                upperRightCorner = { x: extents.max.x, y: extents.max.y }
+                lowerLeftCorner = { x: extents.min.x, y: extents.min.y }
             }
 
             // If nothing found in dxf, use some abitrary defaults
