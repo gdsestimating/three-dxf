@@ -11,6 +11,8 @@ bower install three-dxf
 
 For now we recommend cloning the repo, and starting with our sample. See **Run Samples** below.
 
+![Example of the viewer](https://github.com/gdsestimating/three-dxf/blob/screenshots/screenshots/three-dxf-screenshot.png?raw=true "What the sample looks like")
+
 #### Usage
 ```javascript
 // See index.js in the sample for more details
@@ -31,6 +33,7 @@ cadCanvas = new ThreeDxf.Viewer(dxf, document.getElementById('cad-view'), 400, 4
 After performing the steps above, you can see the example at localhost:8080. You can use the dxf file included in the sample.
 
 Note that the sample contains some three.js extras for Text support. If you wish to view text in DXF files, you will need those extras.
+
 
 #### Supported DXF Features
 Supports:
