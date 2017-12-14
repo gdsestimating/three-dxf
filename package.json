@@ -2,7 +2,7 @@
   "name": "three-dxf",
   "version": "0.2.1",
   "description": "A dxf viewer for the browser using three.js.",
-  "main": "index.js",
+  "main": "dist/three-dxf.js",
   "scripts": {
     "test": "mocha test"
   },
