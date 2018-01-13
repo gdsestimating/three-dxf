@@ -71,80 +71,6 @@ THREE.BulgeGeometry.prototype = Object.create( THREE.Geometry.prototype );
 var ThreeDxf;
 (function(ThreeDxf) {
     
-    var Helpers;
-    (function(Helpers) {
-        
-        var RENDER_MODE_2D = 0;
-        
-        Helpers.findExtents = function(scene) {
-            var box = new THREE.Box3().setFromObject(scene);
-
-            return box;
-        },
-
-        /**
-         * 
-         * @param {number} aspectRatio - the aspect ratio of the view we are geting the initial camera position for 
-         * @param {Scene} scene - the three js scene object holding all entities of the dxf drawing
-         */
-        Helpers.getCameraParametersFromScene = function(aspectRatio, scene) {
-            var upperRightCorner, lowerLeftCorner, center,
-                extentsAspectRatio, vpUpperRightCorner, vpLowerLeftCorner,
-                width, height, header, i, viewports, viewport,
-                dir;
-            
-            var extents;
-            if(scene) {
-                extents = Helpers.findExtents(scene);
-                upperRightCorner = { x: extents.max.x, y: extents.max.y }
-                lowerLeftCorner = { x: extents.min.x, y: extents.min.y }
-            }
-
-            // If nothing found in dxf, use some abitrary defaults
-            if(!lowerLeftCorner || !upperRightCorner) {
-                var halfWidth = 15 * aspectRatio;
-                var halfHeight = 15 * (1 / aspectRatio);
-                upperRightCorner = {
-                    x: halfWidth,
-                    y: halfHeight
-                };
-                lowerLeftCorner = {
-                    x: -halfWidth,
-                    y: -halfHeight
-                };
-            };
-            
-            // Now that we have the corners, figure the current viewport extents
-            width = upperRightCorner.x - lowerLeftCorner.x;
-            height = upperRightCorner.y - lowerLeftCorner.y;
-            center = center || {
-                x: width / 2 + lowerLeftCorner.x,
-                y: height / 2 + lowerLeftCorner.y
-            };
-
-            // fit all objects into current ThreeDXF viewer
-            extentsAspectRatio = Math.abs(width / height);
-            if(aspectRatio > extentsAspectRatio) {
-                width = height * aspectRatio;
-            } else {
-                height = width / aspectRatio;
-            }
-            
-            return {
-                bottom: -height / 2,
-                left: -width / 2,
-                top: height / 2,
-                right: width / 2,
-                center: {
-                    x: center.x,
-                    y: center.y
-                }
-            }
-        };
-        
-    })(Helpers = ThreeDxf.Helpers || (ThreeDxf.Helpers = {}));
-    
-    
     /**
      * Viewer class for a dxf object.
      * @param {Object} data - the dxf object
@@ -162,7 +88,11 @@ var ThreeDxf;
         var scene = new THREE.Scene();
 
         // Create scene from dxf object (data)
-        var i, entity, obj;
+        var i, entity, obj, min_x, min_y, min_z, max_x, max_y, max_z;
+        var dims = {
+            min: { x: false, y: false, z: false},
+            max: { x: false, y: false, z: false}
+        };
         for(i = 0; i < data.entities.length; i++) {
             entity = data.entities[i];
 
@@ -183,17 +113,53 @@ var ThreeDxf;
                 obj = drawEntity(entity, data);
             }
 
-            if(obj) scene.add(obj);
+            if (obj) {
+                var bbox = new THREE.Box3().setFromObject(obj);
+                if (bbox.min.x && ((dims.min.x === false) || (dims.min.x > bbox.min.x))) dims.min.x = bbox.min.x;
+                if (bbox.min.y && ((dims.min.y === false) || (dims.min.y > bbox.min.y))) dims.min.y = bbox.min.y;
+                if (bbox.min.z && ((dims.min.z === false) || (dims.min.z > bbox.min.z))) dims.min.z = bbox.min.z;
+                if (bbox.max.x && ((dims.max.x === false) || (dims.max.x < bbox.max.x))) dims.max.x = bbox.max.x;
+                if (bbox.max.y && ((dims.max.y === false) || (dims.max.y < bbox.max.y))) dims.max.y = bbox.max.y;
+                if (bbox.max.z && ((dims.max.z === false) || (dims.max.z < bbox.max.z))) dims.max.z = bbox.max.z;
+                scene.add(obj);
+            }
             obj = null;
         }
-
 
         width = width || $parent.innerWidth();
         height = height || $parent.innerHeight();
         var aspectRatio = width / height;
+
+        var upperRightCorner = { x: dims.max.x, y: dims.max.y };
+        var lowerLeftCorner = { x: dims.min.x, y: dims.min.y };
+
+        // Figure out the current viewport extents
+        var vp_width = upperRightCorner.x - lowerLeftCorner.x;
+        var vp_height = upperRightCorner.y - lowerLeftCorner.y;
+        var center = center || {
+            x: vp_width / 2 + lowerLeftCorner.x,
+            y: vp_height / 2 + lowerLeftCorner.y
+        };
+
+        // Fit all objects into current ThreeDXF viewer
+        var extentsAspectRatio = Math.abs(vp_width / vp_height);
+        if (aspectRatio > extentsAspectRatio) {
+            vp_width = vp_height * aspectRatio;
+        } else {
+            vp_height = vp_width / aspectRatio;
+        }
         
-        var viewPort = Helpers.getCameraParametersFromScene(aspectRatio, scene);
-        
+        var viewPort = {
+            bottom: -vp_height / 2,
+            left: -vp_width / 2,
+            top: vp_height / 2,
+            right: vp_width / 2,
+            center: {
+                x: center.x,
+                y: center.y
+            }
+        };
+
         var camera = new THREE.OrthographicCamera(viewPort.left, viewPort.right, viewPort.top, viewPort.bottom, 1, 19);
         camera.position.z = 10;
         camera.position.x = viewPort.center.x;
@@ -212,13 +178,13 @@ var ThreeDxf;
         controls.target.z = 0;
         controls.zoomSpeed = 3;
 
+        // Uncommend this to disable rotation (does not make much sense with 2D drawings).
+        //controls.enableRotate = false;
 
-        this.render = function() {
-            renderer.render(scene, camera);
-        };
-
+        this.render = function() { renderer.render(scene, camera) };
         controls.addEventListener('change', this.render);
         this.render();
+        controls.update();
 
         $parent.on('click', function(event) {
             var $el = $(renderer.domElement);
@@ -272,8 +238,138 @@ var ThreeDxf;
                 mesh = drawPoint(entity, data);
             } else if(entity.type === 'INSERT') {
                 mesh = drawBlock(entity, data);
+            } else if(entity.type === 'SPLINE') {
+                mesh = drawSpline(entity, data);
+            } else if(entity.type === 'MTEXT') {
+                mesh = drawMtext(entity, data);
+            } else if(entity.type === 'ELLIPSE') {
+                mesh = drawEllipse(entity, data);
+            }
+            else {
+                console.log("Unsupported Entity Type: " + entity.type);
             }
             return mesh;
+        }
+
+        function drawEllipse(entity, data) {
+            var color = getColor(entity, data);
+
+            var xrad = Math.sqrt(Math.pow(entity.majorAxisEndPoint.x,2) + Math.pow(entity.majorAxisEndPoint.y,2));
+            var yrad = xrad*entity.axisRatio;
+            var rotation = Math.atan2(entity.majorAxisEndPoint.y, entity.majorAxisEndPoint.x);
+
+            var curve = new THREE.EllipseCurve(
+                entity.center.x,  entity.center.y,
+                xrad, yrad,
+                entity.startAngle, entity.endAngle,
+                false, // Always counterclockwise
+                rotation
+            );
+
+            var points = curve.getPoints( 50 );
+            var geometry = new THREE.BufferGeometry().setFromPoints( points );
+            var material = new THREE.LineBasicMaterial( {  linewidth: 1, color : color } );
+
+            // Create the final object to add to the scene
+            var ellipse = new THREE.Line( geometry, material );
+            return ellipse;
+        }
+
+        function drawMtext(entity, data) {
+            var color = getColor(entity, data);
+
+            var geometry = new THREE.TextGeometry( entity.text, {
+                font: font,
+                size: entity.height * (4/5),
+                height: 1
+            });
+            var material = new THREE.MeshBasicMaterial( {color: color} );
+            var text = new THREE.Mesh( geometry, material );
+
+            // Measure what we rendered.
+            var measure = new THREE.Box3();
+            measure.setFromObject( text );
+
+            var textWidth  = measure.max.x - measure.min.x;
+
+            // If the text ends up being wider than the box, it's supposed
+            // to be multiline. Doing that in threeJS is overkill.
+            if (textWidth > entity.width) {
+                console.log("Can't render this multipline MTEXT entity, sorry.", entity);
+                return undefined;
+            }
+
+            text.position.z = 0;
+            switch (entity.attachmentPoint) {
+                case 1:
+                    // Top Left
+                    text.position.x = entity.position.x;
+                    text.position.y = entity.position.y - entity.height;
+                break;
+                case 2:
+                    // Top Center
+                    text.position.x = entity.position.x - textWidth/2;
+                    text.position.y = entity.position.y - entity.height;
+                break;
+                case 3:
+                    // Top Right
+                    text.position.x = entity.position.x - textWidth;
+                    text.position.y = entity.position.y - entity.height;
+                break;
+
+                case 4:
+                    // Middle Left
+                    text.position.x = entity.position.x;
+                    text.position.y = entity.position.y - entity.height/2;
+                break;
+                case 5:
+                    // Middle Center
+                    text.position.x = entity.position.x - textWidth/2;
+                    text.position.y = entity.position.y - entity.height/2;
+                break;
+                case 6:
+                    // Middle Right
+                    text.position.x = entity.position.x - textWidth;
+                    text.position.y = entity.position.y - entity.height/2;
+                break;
+
+                case 7:
+                    // Bottom Left
+                    text.position.x = entity.position.x;
+                    text.position.y = entity.position.y;
+                break;
+                case 8:
+                    // Bottom Center
+                    text.position.x = entity.position.x - textWidth/2;
+                    text.position.y = entity.position.y;
+                break;
+                case 9:
+                    // Bottom Right
+                    text.position.x = entity.position.x - textWidth;
+                    text.position.y = entity.position.y;
+                break;
+
+                default:
+                    return undefined;
+            };
+
+            return text;
+        }
+
+        function drawSpline(entity, data) {
+            var color = getColor(entity, data);
+
+            var points = entity.controlPoints.map(function(vec) {
+                return new THREE.Vector2(vec.x, vec.y);
+            });
+
+            var curve = new THREE.SplineCurve(points);
+            var points = curve.getPoints( 100 );
+            var geometry = new THREE.BufferGeometry().setFromPoints( points );
+            var material = new THREE.LineBasicMaterial( { linewidth: 1, color : color } );
+            var splineObject = new THREE.Line( geometry, material );
+
+            return splineObject;
         }
 
         function drawLine(entity, data) {
@@ -429,6 +525,8 @@ var ThreeDxf;
         function drawBlock(entity, data) {
             var block = data.blocks[entity.name];
             
+            if (!block.entities) return null;
+
             var group = new THREE.Object3D()
             
             if(entity.xScale) group.scale.x = entity.xScale;
