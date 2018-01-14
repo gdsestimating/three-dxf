@@ -1,4 +1,4 @@
-//three-dxf v0.2.1
+//three-dxf v0.3.0
 
 /**
  * Returns the angle in radians of the vector (p1,p2). In other words, imagine

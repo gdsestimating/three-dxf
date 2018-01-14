@@ -6,7 +6,7 @@
 
 #### Install
 ```
-bower install three-dxf
+npm install three-dxf
 ```
 
 For now we recommend cloning the repo, and starting with our sample. See **Run Samples** below.
@@ -24,15 +24,14 @@ cadCanvas = new ThreeDxf.Viewer(dxf, document.getElementById('cad-view'), 400, 4
 #### Run Samples
 ```
 > cd sample
-> bower install
+> npm install
+> cd ..
 > npm install -g http-server
 > http-server .
 # use `http-server -c-1 .` to prevent caching
 ```
 
-After performing the steps above, you can see the example at localhost:8080. You can use the dxf file included in the sample.
-
-Note that the sample contains some three.js extras for Text support. If you wish to view text in DXF files, you will need those extras.
+After performing the steps above, you can see the example at [http://127.0.0.1:8080/sample](http://127.0.0.1:8080/sample). You can use the dxf file included in the sample.
 
 
 #### Supported DXF Features
@@ -43,6 +42,8 @@ Supports:
 * Some support for line types
 * Simple Text
 * Viewport
+* Splines
+* Ellipses
  
 Does not yet support:
 * Attributes

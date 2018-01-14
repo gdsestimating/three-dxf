@@ -1,0 +1,12 @@
+{
+  "name": "three-dxf-sample",
+  "version": "1.0.0",
+  "description": "A demo app of three-dxf",
+  "scripts": {},
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {
+    "dxf-parser": "^0.5.1",
+    "jquery": "^3.2.1"
+  }
+}

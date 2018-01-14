@@ -1,6 +1,6 @@
 {
   "name": "three-dxf",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "A dxf viewer for the browser using three.js.",
   "main": "index.js",
   "scripts": {
