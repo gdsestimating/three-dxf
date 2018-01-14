@@ -52,5 +52,3 @@ Does not yet support:
 * MText
 * other less common objects and entities.
 
-#### Contributors
-bzuillsmith@gmail.com
