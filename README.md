@@ -28,7 +28,7 @@ cadCanvas = new ThreeDxf.Viewer(dxf, document.getElementById('cad-view'), 400, 4
 > cd ..
 > npm install -g http-server
 > http-server .
-# use `http-server -c-1 .` to prevent caching
+# use `http-server -c-0 .` to prevent caching
 ```
 
 After performing the steps above, you can see the example at [http://127.0.0.1:8080/sample](http://127.0.0.1:8080/sample). You can use the dxf file included in the sample.
@@ -42,7 +42,7 @@ Supports:
 * Some support for line types
 * Simple Text
 * Viewport
-* Splines
+* Splines (Quadratic and Cubic)
 * Ellipses
  
 Does not yet support:
