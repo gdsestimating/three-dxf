@@ -363,9 +363,18 @@ var ThreeDxf;
                 return new THREE.Vector2(vec.x, vec.y);
             });
 
-            var curve = new THREE.SplineCurve(points);
-            var points = curve.getPoints( 100 );
-            var geometry = new THREE.BufferGeometry().setFromPoints( points );
+            var interpolatedPoints = [];
+            if (entity.degreeOfSplineCurve == 2) {
+                for(var i = 0; i + 2 < points.length; i = i + 2) {
+                    curve = new THREE.QuadraticBezierCurve(points[i], points[i + 1], points[i + 2]);
+                    interpolatedPoints.push.apply(interpolatedPoints, curve.getPoints(50));
+                }
+            } else {
+                curve = new THREE.SplineCurve(points);
+                interpolatedPoints = curve.getPoints( 100 );
+            }
+
+            var geometry = new THREE.BufferGeometry().setFromPoints( interpolatedPoints );
             var material = new THREE.LineBasicMaterial( { linewidth: 1, color : color } );
             var splineObject = new THREE.Line( geometry, material );
 
