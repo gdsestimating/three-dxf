@@ -227,7 +227,7 @@ var ThreeDxf;
         function drawEntity(entity, data) {
             var mesh;
             if(entity.type === 'CIRCLE' || entity.type === 'ARC') {
-                mesh = drawCircle(entity, data);
+                mesh = drawArc(entity, data);
             } else if(entity.type === 'LWPOLYLINE' || entity.type === 'LINE' || entity.type === 'POLYLINE') {
                 mesh = drawLine(entity, data);
             } else if(entity.type === 'TEXT') {
@@ -439,20 +439,32 @@ var ThreeDxf;
             return line;
         }
         
-        function drawCircle(entity, data) {
-            var geometry, material, circle;
+        function drawArc(entity, data) {
+            if (entity.type === 'CIRCLE') {
+                startAngle = entity.startAngle || 0;
+                endAngle = startAngle + 2 * Math.PI;
+            } else {
+                startAngle = entity.startAngle;
+                endAngle = entity.endAngle;
+            }
 
-            geometry = new THREE.CircleGeometry(entity.radius, 32, entity.startAngle, entity.angleLength);
-            geometry.vertices.shift();
+            var curve = new THREE.ArcCurve(
+                0, 0,
+                entity.radius,
+                startAngle,
+                endAngle);
 
-            material = new THREE.LineBasicMaterial({ color: getColor(entity, data) });
+            var points = curve.getPoints( 32 );
+            var geometry = new THREE.BufferGeometry().setFromPoints( points );
 
-            circle = new THREE.Line(geometry, material);
-            circle.position.x = entity.center.x;
-            circle.position.y = entity.center.y;
-            circle.position.z = entity.center.z;
+            var material = new THREE.LineBasicMaterial({ color: getColor(entity, data) });
 
-            return circle;
+            var arc = new THREE.Line(geometry, material);
+            arc.position.x = entity.center.x;
+            arc.position.y = entity.center.y;
+            arc.position.z = entity.center.z;
+
+            return arc;
         }
 
         function drawSolid(entity, data) {
