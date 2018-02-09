@@ -22,6 +22,8 @@
   "license": "MIT",
   "devDependencies": {},
   "dependencies": {
+    "jquery": "3.3.1",
+    "three": "0.89.0"
   },
   "keywords": [
     "dxf",
