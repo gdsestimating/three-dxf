@@ -508,6 +508,11 @@ var ThreeDxf;
             
             geometry = new THREE.TextGeometry(entity.text, { font: font, height: 0, size: entity.textHeight || 12 });
 
+            if (entity.rotation) {
+                var zRotation = entity.rotation * Math.PI / 180;
+                geometry.rotateZ(zRotation);
+            }
+
             material = new THREE.MeshBasicMaterial({ color: getColor(entity, data) });
 
             text = new THREE.Mesh(geometry, material);
