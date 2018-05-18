@@ -364,9 +364,13 @@ var ThreeDxf;
             });
 
             var interpolatedPoints = [];
-            if (entity.degreeOfSplineCurve == 2) {
+            if (entity.degreeOfSplineCurve === 2 || entity.degreeOfSplineCurve === 3) {
                 for(var i = 0; i + 2 < points.length; i = i + 2) {
-                    curve = new THREE.QuadraticBezierCurve(points[i], points[i + 1], points[i + 2]);
+			if (entity.degreeOfSplineCurve === 2) {
+                    		curve = new THREE.QuadraticBezierCurve(points[i], points[i + 1], points[i + 2]);
+			} else {
+				curve = new THREE.QuadraticBezierCurve3(points[i], points[i + 1], points[i + 2]);
+			}
                     interpolatedPoints.push.apply(interpolatedPoints, curve.getPoints(50));
                 }
             } else {
