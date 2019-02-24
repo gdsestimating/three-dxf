@@ -3,6 +3,7 @@ var progress = document.getElementById('file-progress-bar');
 var $progress = $('.progress');
 
 var $cadview = $('#cad-view');
+var dxfContentEl = $('#dxf-content')[0];
 var cadCanvas;
 
 // Setup the dnd listeners.
@@ -75,6 +76,12 @@ function onSuccess(evt){
     var parser = new window.DxfParser();
     var dxf = parser.parseSync(fileReader.result);
     
+    if(dxf) {
+        dxfContentEl.innerHTML = JSON.stringify(dxf, null, 2);
+    } else {
+        dxfContentEl.innerHTML = 'No data.';
+    }
+
     // Three.js changed the way fonts are loaded, and now we need to use FontLoader to load a font
     //  and enable TextGeometry. See this example http://threejs.org/examples/?q=text#webgl_geometry_text
     //  and this discussion https://github.com/mrdoob/three.js/issues/7398 
@@ -82,7 +89,7 @@ function onSuccess(evt){
     var loader = new THREE.FontLoader();
     loader.load( 'fonts/helvetiker_regular.typeface.json', function ( response ) {
         font = response;
-        cadCanvas = new ThreeDxf.Viewer(dxf, document.getElementById('cad-view'), 400, 400, font);
+        cadCanvas = new window.ThreeDxf.Viewer(dxf, document.getElementById('cad-view'), 400, 400, font);
     });
     
 }

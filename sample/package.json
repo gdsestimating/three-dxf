@@ -6,7 +6,8 @@
   "license": "MIT",
   "devDependencies": {},
   "dependencies": {
-    "dxf-parser": "^0.5.1",
-    "jquery": "^3.2.1"
+    "dxf-parser": "1.0.0-alpha.1",
+    "jquery": "^3.2.1",
+    "three": "^0.101.1"
   }
 }
