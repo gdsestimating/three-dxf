@@ -426,6 +426,7 @@ export function Viewer(data, parent, width, height, font) {
     }
     
     function drawArc(entity, data) {
+        var startAngle, endAngle;
         if (entity.type === 'CIRCLE') {
             startAngle = entity.startAngle || 0;
             endAngle = startAngle + 2 * Math.PI;

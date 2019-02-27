@@ -4,3 +4,4 @@ private/
 typings/
 build/
 .vscode/
+dist/

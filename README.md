@@ -23,8 +23,15 @@ cadCanvas = new ThreeDxf.Viewer(dxf, document.getElementById('cad-view'), 400, 4
 
 #### Run Samples
 ```
+# first, compile three-dxf
+> npm install
+> npm run build
+
+# then install the sample's dependencies
 > cd sample
 > npm install
+
+# go back to the root and run http-server to run the sample
 > cd ..
 > npm install -g http-server
 > http-server .
