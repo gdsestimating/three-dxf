@@ -33,12 +33,12 @@ cadCanvas = new ThreeDxf.Viewer(dxf, document.getElementById('cad-view'), 400, 4
 
 # go back to the root and run http-server to run the sample
 > cd ..
-> npm install -g http-server
+> npm install -g http-server@0.9.0
 > http-server .
-# use `http-server -c-0 .` to prevent caching
+# use `http-server -c-1 .` to prevent caching
 ```
 
-After performing the steps above, you can see the example at [http://127.0.0.1:8080/sample](http://127.0.0.1:8080/sample). You can use the dxf file included in the sample.
+After performing the steps above, you can see the example at [http://127.0.0.1:8080/sample/index.html](http://127.0.0.1:8080/sample/index.html). You can use the dxf file included in the sample. **NOTE: the latest version of http-server will go into a redirect loop if you exlcude "/index.html" from the url.**
 
 
 #### Supported DXF Features
