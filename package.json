@@ -1,10 +1,12 @@
 {
   "name": "three-dxf",
-  "version": "0.3.1",
+  "version": "1.0.0-alpha.1",
   "description": "A dxf viewer for the browser using three.js.",
-  "main": "index.js",
+  "main": "dist/three-dxf.js",
+  "module": "src/index.js",
   "scripts": {
-    "test": "mocha test"
+    "build-dev": "webpack --mode development",
+    "build": "webpack --mode production"
   },
   "repository": {
     "type": "git",
@@ -20,12 +22,17 @@
     "Ben Zuill-Smith <bzuillsmith@gmail.com>"
   ],
   "license": "MIT",
-  "devDependencies": {},
-  "dependencies": {
+  "devDependencies": {
+    "webpack": "^4.29.5",
+    "webpack-cli": "^3.2.3"
+  },
+  "peerDependencies": {
+    "three": "0.x.x"
   },
   "keywords": [
     "dxf",
     "cad",
     "viewer"
-  ]
+  ],
+  "dependencies": {}
 }
