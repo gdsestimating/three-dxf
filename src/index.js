@@ -94,23 +94,7 @@ export function Viewer(data, parent, width, height, font) {
     };
     for(i = 0; i < data.entities.length; i++) {
         entity = data.entities[i];
-
-        if(entity.type === 'DIMENSION') {
-            if(entity.block) {
-                var block = data.blocks[entity.block];
-                if(!block) {
-                    console.error('Missing referenced block "' + entity.block + '"');
-                    continue;
-                }
-                for(var j = 0; j < block.entities.length; j++) {
-                    obj = drawEntity(block.entities[j], data);
-                }
-            } else {
-                console.log('WARNING: No block for DIMENSION entity');
-            }
-        } else {
-            obj = drawEntity(entity, data);
-        }
+        obj = drawEntity(entity, data);
 
         if (obj) {
             var bbox = new THREE.Box3().setFromObject(obj);
@@ -226,6 +210,13 @@ export function Viewer(data, parent, width, height, font) {
             mesh = drawMtext(entity, data);
         } else if(entity.type === 'ELLIPSE') {
             mesh = drawEllipse(entity, data);
+        } else if(entity.type === 'DIMENSION') {
+            var dimTypeEnum = entity.dimensionType & 7;
+            if(dimTypeEnum === 0) {
+                mesh = drawDimension(entity, data);
+            } else {
+                console.log("Unsupported Dimension type: " + dimTypeEnum);
+            }
         }
         else {
             console.log("Unsupported Entity Type: " + entity.type);
@@ -346,6 +337,7 @@ export function Viewer(data, parent, width, height, font) {
         });
 
         var interpolatedPoints = [];
+        var curve;
         if (entity.degreeOfSplineCurve === 2 || entity.degreeOfSplineCurve === 3) {
             for(var i = 0; i + 2 < points.length; i = i + 2) {
         if (entity.degreeOfSplineCurve === 2) {
@@ -528,6 +520,26 @@ export function Viewer(data, parent, width, height, font) {
         material = new THREE.PointsMaterial( { size: 0.05, vertexColors: THREE.VertexColors } );
         point = new THREE.Points(geometry, material);
         scene.add(point);
+    }
+
+    function drawDimension(entity, data) {
+        var block = data.blocks[entity.block];
+
+        if (!block || !block.entities) return null;
+
+        var group = new THREE.Object3D();
+        // if(entity.anchorPoint) {
+        //     group.position.x = entity.anchorPoint.x;
+        //     group.position.y = entity.anchorPoint.y;
+        //     group.position.z = entity.anchorPoint.z;
+        // }
+
+        for(var i = 0; i < block.entities.length; i++) {
+            var childEntity = drawEntity(block.entities[i], data, group);
+            if(childEntity) group.add(childEntity);
+        }
+
+        return group;
     }
 
     function drawBlock(entity, data) {
