@@ -1,27 +1,38 @@
 
-# Three-Dxf
+# three-dxf-loader
 
-**Three-Dxf** is a javascript viewer for dxf files. It takes dxf objects produced from Dxf-Parser and renders them using
+**three-dxf-loader** is a javascript DXF file loader for THREE.js. It takes URL to a DXF file and creates THREE.js mesh entities. It internally uses Dxf-Parser for parsing and then renders them using
  three.js.
 
 #### Install
 ```
-npm install three-dxf
+yarn add "https://github.com/prolincur/three-dxf-loader.git#master"
 ```
 
+#### Usage
+```javascript
+const loader = new DXFLoader();
+// loader.setFont(font); // set fonts
+const scene = new THREE.Scene();
+onLoad = (data) => {
+    if (data && data.entities) {
+      data.entities.forEach(ent => scene.add(ent))
+    }
+}
+const onError = (error) => {
+  console.log(error);
+}
+const onProgress = (xhr) => {
+  console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+}
+loader.load(url, onLoad, onProgress, onError);
+```
+
+#### Run Web Viewer Sample
 For now we recommend cloning the repo, and starting with our sample. See **Run Samples** below.
 
 ![Example of the viewer](https://github.com/gdsestimating/three-dxf/blob/screenshots/screenshots/three-dxf-screenshot.png?raw=true "What the sample looks like")
 
-#### Usage
-```javascript
-// See index.js in the sample for more details
-var parser = new window.DxfParser();
-var dxf = parser.parseSync(fileReader.result);
-cadCanvas = new ThreeDxf.Viewer(dxf, document.getElementById('cad-view'), 400, 400);
-```
-
-#### Run Samples
 ```
 # first, compile three-dxf
 > npm install

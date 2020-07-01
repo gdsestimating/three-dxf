@@ -1,7 +1,7 @@
 {
   "name": "three-dxf",
   "version": "1.0.0-alpha.1",
-  "description": "A dxf viewer for the browser using three.js.",
+  "description": "Cross platfrom DXF loader using three.js. Out of the box usable with react-three-fibre.",
   "main": "dist/three-dxf.js",
   "module": "src/index.js",
   "scripts": {
@@ -19,7 +19,8 @@
   "homepage": "https://github.com/gdsestimating/three-dxf",
   "author": "GDS Storefront Estimating (gdsestimating.com)",
   "contributors": [
-    "Ben Zuill-Smith <bzuillsmith@gmail.com>"
+    "Ben Zuill-Smith <bzuillsmith@gmail.com>",
+    "Sourabh Soni / https://www.prolincur.com"
   ],
   "license": "MIT",
   "devDependencies": {
@@ -35,6 +36,6 @@
     "viewer"
   ],
   "dependencies": {
-    "dxf-parser": "1.0.0-alpha.1"
+    "dxf-parser": "1.0.0-alpha.2"
   }
 }
