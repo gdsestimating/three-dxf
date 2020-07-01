@@ -5,3 +5,5 @@ typings/
 build/
 .vscode/
 dist/
+*.lock
+sample/*.lock

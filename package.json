@@ -34,5 +34,7 @@
     "cad",
     "viewer"
   ],
-  "dependencies": {}
+  "dependencies": {
+    "dxf-parser": "1.0.0-alpha.1"
+  }
 }
