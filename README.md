@@ -1,8 +1,7 @@
 
 # three-dxf-loader
 
-**three-dxf-loader** is a javascript DXF file loader for THREE.js. It takes URL to a DXF file and creates THREE.js mesh entities. It internally uses Dxf-Parser for parsing and then renders them using
- three.js.
+**three-dxf-loader** is a cross platfrom DXF file loader for THREE.js. It takes URL to a DXF file and creates THREE.js mesh entities. It internally uses Dxf-Parser for parsing and then renders them using THREE.js. It's out of the box usable with react-three-fibre.
 
 #### Install
 ```
