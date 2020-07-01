@@ -11,6 +11,9 @@ yarn add "https://github.com/prolincur/three-dxf-loader.git#master"
 
 #### Usage
 ```javascript
+import * as THREE from 'three'
+import { DXFLoader } from 'three-dxf-loader'
+
 const loader = new DXFLoader();
 // loader.setFont(font); // set fonts
 const scene = new THREE.Scene();
