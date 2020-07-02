@@ -1,22 +1,21 @@
 {
-  "name": "three-dxf",
-  "version": "1.0.0-alpha.1",
-  "description": "Cross platfrom DXF loader using three.js. Out of the box usable with react-three-fibre.",
-  "main": "dist/three-dxf.js",
-  "module": "src/index.js",
+  "name": "three-dxf-loader",
+  "version": "2.0.0",
+  "description": "Cross platform DXF loader using three.js. Out of the box usable with react-three-fibre.",
+  "main": "src/index.js",
   "scripts": {
     "build-dev": "webpack --mode development",
     "build": "webpack --mode production"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/gdsestimating/three-dxf"
+    "url": "https://github.com/prolincur/three-dxf-loader"
   },
   "bugs": {
-    "url": "https://github.com/gdsestimating/three-dxf/issues",
+    "url": "https://github.com/prolincur/three-dxf-loader/issues",
     "email": "bzuillsmith@gmail.com"
   },
-  "homepage": "https://github.com/gdsestimating/three-dxf",
+  "homepage": "https://github.com/prolincur/three-dxf-loader",
   "author": "GDS Storefront Estimating (gdsestimating.com)",
   "contributors": [
     "Ben Zuill-Smith <bzuillsmith@gmail.com>",
@@ -33,7 +32,11 @@
   "keywords": [
     "dxf",
     "cad",
-    "viewer"
+    "viewer",
+    "three",
+    "react-three-fibre",
+    "react-native",
+    "cross-platform"
   ],
   "dependencies": {
     "dxf-parser": "1.0.0-alpha.2"
