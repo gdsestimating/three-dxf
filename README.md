@@ -5,7 +5,11 @@
 
 #### Install
 ```
-yarn add "https://github.com/prolincur/three-dxf-loader.git#master"
+yarn add three-dxf-loader
+```
+or
+```
+npm i three-dxf-loader
 ```
 
 #### Usage
