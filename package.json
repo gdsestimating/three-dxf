@@ -2,7 +2,8 @@
   "name": "three-dxf-loader",
   "version": "2.0.0",
   "description": "Cross platform DXF loader using three.js. Out of the box usable with react-three-fibre.",
-  "main": "src/index.js",
+  "main": "dist/three-dxf-loader.js",
+  "module": "src/index.js",
   "scripts": {
     "build-dev": "webpack --mode development",
     "build": "webpack --mode production"
@@ -12,16 +13,18 @@
     "url": "https://github.com/prolincur/three-dxf-loader"
   },
   "bugs": {
-    "url": "https://github.com/prolincur/three-dxf-loader/issues",
-    "email": "bzuillsmith@gmail.com"
+    "url": "https://github.com/prolincur/three-dxf-loader/issues"
   },
   "homepage": "https://github.com/prolincur/three-dxf-loader",
-  "author": "GDS Storefront Estimating (gdsestimating.com)",
+  "author": "Prolincur Technologies (prolincur.com) and GDS Storefront Estimating (gdsestimating.com)",
   "contributors": [
     "Ben Zuill-Smith <bzuillsmith@gmail.com>",
     "Sourabh Soni / https://www.prolincur.com"
   ],
   "license": "MIT",
+  "files": [
+    "dist/*"
+  ],
   "devDependencies": {
     "webpack": "^4.29.5",
     "webpack-cli": "^3.2.3"
