@@ -3,7 +3,6 @@
   "version": "2.0.3",
   "description": "Cross platform DXF loader for three.js. Out of the box usable with react-three-fibre.",
   "main": "dist/three-dxf-loader.js",
-  "module": "src/index.js",
   "scripts": {
     "build-dev": "webpack --mode development",
     "build": "webpack --mode production"
@@ -26,6 +25,7 @@
     "dist/*"
   ],
   "devDependencies": {
+    "babel-minify-webpack-plugin": "^0.3.1",
     "webpack": "^4.29.5",
     "webpack-cli": "^3.2.3"
   },
@@ -39,7 +39,7 @@
     "cross-platform"
   ],
   "peerDependencies": {
-    "three": "^0.115.0"
+    "three": "^0.118.3"
   },
   "dependencies": {
     "dxf-parser": "1.0.0-alpha.2"

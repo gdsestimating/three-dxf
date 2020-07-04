@@ -4,12 +4,16 @@
  */
 
 const webpack = require('webpack');
+const MinifyPlugin = require("babel-minify-webpack-plugin");
 const path = require('path');
 
 module.exports = {
-    entry: './src/index.js',
+    entry: {
+        'three-dxf-loader': './src/loader.js',
+        'three-dxf-viewer': './src/viewer.js'
+    },
     output: {
-        filename: 'three-dxf-loader.js',
+        filename: '[name].js',
         path: path.resolve(__dirname, 'dist'),
         library: 'ThreeDxfLoader',
         libraryTarget: 'umd',
@@ -23,8 +27,8 @@ module.exports = {
             amd: 'THREE'
         }
     },
-    devtool: 'eval-source-map',
     plugins: [
+        new MinifyPlugin(),
 		new webpack.BannerPlugin(
 		'Copyright (c) 2020 Prolincur Technologies LLP.\nAll Rights Reserved.\n\n' +
 		'Please check the provided LICENSE file for licensing details.\n' +
