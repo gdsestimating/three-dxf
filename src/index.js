@@ -1,10 +1,15 @@
-import * as THREE from 'three';
-import { Loader, FileLoader } from 'three';
-import DxfParser from 'dxf-parser';
-import { OrbitControls } from './OrbitControls';
+/*
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) 2020 Prolincur Technologies
+ * 
+ */
 
-// Three.js extension functions. Webpack doesn't seem to like it if we modify the THREE object directly.
-var THREEx = { Math: {} };
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import DxfParser from 'dxf-parser';
+
+if (typeof THREE === 'undefined' && typeof three !== 'undefined') THREE = three
 /**
  * Returns the angle in radians of the vector (p1,p2). In other words, imagine
  * putting the base of the vector at coordinates (0,0) and finding the angle
@@ -13,7 +18,7 @@ var THREEx = { Math: {} };
  * @param  {Object} p2 end point of the vector
  * @return {Number} the angle
  */
-THREEx.Math.angle2 = function(p1, p2) {
+THREE.Math.angle2 = function(p1, p2) {
 	var v1 = new THREE.Vector2(p1.x, p1.y);
 	var v2 = new THREE.Vector2(p2.x, p2.y);
 	v2.sub(v1); // sets v2 to be our chord
@@ -23,7 +28,7 @@ THREEx.Math.angle2 = function(p1, p2) {
 };
 
 
-THREEx.Math.polar = function(point, distance, angle) {
+THREE.Math.polar = function(point, distance, angle) {
 	var result = {};
 	result.x = point.x + distance * Math.cos(angle);
 	result.y = point.y + distance * Math.sin(angle);
@@ -37,7 +42,7 @@ THREEx.Math.polar = function(point, distance, angle) {
  * @param bulge - a value indicating how much to curve
  * @param segments - number of segments between the two given points
  */
-THREEx.BulgeGeometry = function ( startPoint, endPoint, bulge, segments ) {
+THREE.BulgeGeometry = function ( startPoint, endPoint, bulge, segments ) {
 
 	var vertex, i,
 		center, p0, p1, angle,
@@ -52,10 +57,10 @@ THREEx.BulgeGeometry = function ( startPoint, endPoint, bulge, segments ) {
 
 	angle = 4 * Math.atan(bulge);
 	radius = p0.distanceTo(p1) / 2 / Math.sin(angle/2);
-	center = THREEx.Math.polar(startPoint, radius, THREEx.Math.angle2(p0,p1) + (Math.PI / 2 - angle/2));
+	center = THREE.Math.polar(startPoint, radius, THREE.Math.angle2(p0,p1) + (Math.PI / 2 - angle/2));
 
 	this.segments = segments = segments || Math.max( Math.abs(Math.ceil(angle/(Math.PI/18))), 6); // By default want a segment roughly every 10 degrees
-	startAngle = THREEx.Math.angle2(center, p0);
+	startAngle = THREE.Math.angle2(center, p0);
 	thetaAngle = angle / segments;
 
 
@@ -63,7 +68,7 @@ THREEx.BulgeGeometry = function ( startPoint, endPoint, bulge, segments ) {
 
 	for(i = 1; i <= segments - 1; i++) {
 
-		vertex = THREEx.Math.polar(center, Math.abs(radius), startAngle + thetaAngle * i);
+		vertex = THREE.Math.polar(center, Math.abs(radius), startAngle + thetaAngle * i);
 
 		this.vertices.push(new THREE.Vector3(vertex.x, vertex.y, 0));
 
@@ -71,7 +76,7 @@ THREEx.BulgeGeometry = function ( startPoint, endPoint, bulge, segments ) {
 
 };
 
-THREEx.BulgeGeometry.prototype = Object.create( THREE.Geometry.prototype );
+THREE.BulgeGeometry.prototype = Object.create( THREE.Geometry.prototype );
 
 /**
  * THREE.Loader implementation for DXF files
@@ -82,11 +87,11 @@ THREEx.BulgeGeometry.prototype = Object.create( THREE.Geometry.prototype );
  * @author Sourabh Soni / https://www.prolincur.com
  */
 export const DXFLoader = function (manager) {
-    Loader.call(this, manager);
+    THREE.Loader.call(this, manager);
     this.font = null
 }
 
-DXFLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
+DXFLoader.prototype = Object.assign( Object.create( THREE.Loader.prototype ), {
     constructor: DXFLoader,
 
     setFont: function ( font ) {
@@ -96,7 +101,7 @@ DXFLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
     
     load: function ( url, onLoad, onProgress, onError ) {
         var scope = this;
-		var loader = new FileLoader( scope.manager );
+		var loader = new THREE.XHRLoader( scope.manager );
 
 		loader.setPath( scope.path );
 		loader.load( url, ( text ) => {
@@ -132,12 +137,8 @@ DXFLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 
         var entities = []
 
-        // Create scene from dxf object (data)
-        var i, entity, obj, min_x, min_y, min_z, max_x, max_y, max_z;
-        var dims = {
-            min: { x: false, y: false, z: false},
-            max: { x: false, y: false, z: false}
-        };
+        // Create entities from dxf object (data)
+        var i, entity, obj;
         for(i = 0; i < data.entities.length; i++) {
             entity = data.entities[i];
             obj = drawEntity(entity, data);
@@ -335,7 +336,7 @@ DXFLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
                     startPoint = entity.vertices[i];
                     endPoint = i + 1 < entity.vertices.length ? entity.vertices[i + 1] : geometry.vertices[0];
 
-                    bulgeGeometry = new THREEx.BulgeGeometry(startPoint, endPoint, bulge);
+                    bulgeGeometry = new THREE.BulgeGeometry(startPoint, endPoint, bulge);
 
                     geometry.vertices.push.apply(geometry.vertices, bulgeGeometry.vertices);
                 } else {
@@ -486,7 +487,7 @@ DXFLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 
             material = new THREE.PointsMaterial( { size: 0.05, vertexColors: THREE.VertexColors } );
             point = new THREE.Points(geometry, material);
-            scene.add(point);
+            entities.push(point);
         }
 
         function drawDimension(entity, data) {
@@ -746,7 +747,8 @@ export function Viewer(data, parent, width, height, font) {
     controls.zoomSpeed = 3;
 
     //Uncomment this to disable rotation (does not make much sense with 2D drawings).
-    //controls.enableRotate = false;
+    controls.enableRotate = false;
+    controls.enablePan = false;
 
     this.render = function() { renderer.render(scene, camera) };
     controls.addEventListener('change', this.render);

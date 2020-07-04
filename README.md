@@ -1,15 +1,15 @@
 
 # three-dxf-loader
 
-**three-dxf-loader** is a cross platform DXF file loader for THREE.js. It takes URL of a DXF file and creates THREE.js mesh entities. It internally uses Dxf-Parser for parsing and then renders them using THREE.js. It's out of the box usable with react-three-fibre.
+**three-dxf-loader** is a cross platform DXF file loader for THREE.js. It takes URL of a DXF file as input and returns THREE.js mesh entities. It internally uses dxf-parser for parsing DXF file. This library works out of the box with cross platform react-native and react-three-fibre.
 
 #### Install
 ```
-yarn add three-dxf-loader
+yarn add three-dxf-loader three
 ```
 or
 ```
-npm i three-dxf-loader
+npm i three-dxf-loader three
 ```
 
 #### Usage
@@ -35,18 +35,16 @@ loader.load(url, onLoad, onProgress, onError);
 ```
 
 #### Run Web Viewer Sample
-For now we recommend cloning the repo, and starting with our sample. See **Run Samples** below.
-
-![Example of the viewer](https://github.com/gdsestimating/three-dxf/blob/screenshots/screenshots/three-dxf-screenshot.png?raw=true "What the sample looks like")
+![Example of the viewer](https://github.com/prolincur/three-dxf-loader/blob/master/sample/data/screenshots.png?raw=true "What the sample looks like")
 
 ```
-# first, compile three-dxf
-> npm install
-> npm run build
+# First, compile three-dxf-loader
+> yarn install
+> yarn build
 
 # then install the sample's dependencies
 > cd sample
-> npm install
+> yarn install
 
 # go back to the root and run http-server to run the sample
 > cd ..
@@ -55,7 +53,7 @@ For now we recommend cloning the repo, and starting with our sample. See **Run S
 # use `http-server -c-1 .` to prevent caching
 ```
 
-After performing the steps above, you can see the example at [http://127.0.0.1:8080/sample/index.html](http://127.0.0.1:8080/sample/index.html). You can use the dxf file included in the sample. **NOTE: the latest version of http-server will go into a redirect loop if you exlcude "/index.html" from the url.**
+After performing the steps above, you can see the example at [http://127.0.0.1:8080/sample/index.html](http://127.0.0.1:8080/sample/index.html). You can use the DXF file included in the sample. **NOTE: the latest version of http-server will go into a redirect loop if you exclude "/index.html" from the url.**
 
 
 #### Supported DXF Features

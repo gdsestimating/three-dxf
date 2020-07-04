@@ -1,13 +1,13 @@
 {
   "name": "three-dxf-sample",
   "version": "1.0.0",
-  "description": "A demo app of three-dxf",
+  "description": "A demo app of three-dxf-loader",
   "scripts": {},
   "license": "MIT",
   "devDependencies": {},
   "dependencies": {
-    "dxf-parser": "1.0.0-alpha.1",
+    "dxf-parser": "1.0.0-alpha.2",
     "jquery": "^3.2.1",
-    "three": "^0.101.1"
+    "three": "^0.115.0"
   }
 }
