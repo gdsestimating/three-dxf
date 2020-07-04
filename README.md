@@ -35,7 +35,7 @@ loader.load(url, onLoad, onProgress, onError);
 ```
 
 #### Run Web Viewer Sample
-![Example of the viewer](https://github.com/prolincur/three-dxf-loader/blob/master/sample/data/screenshots.png?raw=true "What the sample looks like")
+![Example of the viewer](https://raw.githubusercontent.com/prolincur/three-dxf-loader/master/sample/data/snapshot.png "What the sample looks like")
 
 ```
 # First, compile three-dxf-loader
