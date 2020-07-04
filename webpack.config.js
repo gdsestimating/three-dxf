@@ -16,7 +16,12 @@ module.exports = {
         globalObject: 'typeof self !== \'undefined\' ? self : this'
     },
     externals: {
-        three: 'three'
+        three: {
+            root: 'THREE',
+            commonjs: 'three',
+            commonjs2: 'three',
+            amd: 'THREE'
+        }
     },
     devtool: 'eval-source-map',
     plugins: [

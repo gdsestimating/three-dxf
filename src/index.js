@@ -9,7 +9,6 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import DxfParser from 'dxf-parser';
 
-if (typeof THREE === 'undefined' && typeof three !== 'undefined') THREE = three
 /**
  * Returns the angle in radians of the vector (p1,p2). In other words, imagine
  * putting the base of the vector at coordinates (0,0) and finding the angle

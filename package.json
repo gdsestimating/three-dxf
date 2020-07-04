@@ -1,7 +1,7 @@
 {
   "name": "three-dxf-loader",
-  "version": "2.0.2",
-  "description": "Cross platform DXF loader using three.js. Out of the box usable with react-three-fibre.",
+  "version": "2.0.3",
+  "description": "Cross platform DXF loader for three.js. Out of the box usable with react-three-fibre.",
   "main": "dist/three-dxf-loader.js",
   "module": "src/index.js",
   "scripts": {
@@ -38,8 +38,10 @@
     "react-native",
     "cross-platform"
   ],
-  "dependencies": {
-    "dxf-parser": "1.0.0-alpha.2",
+  "peerDependencies": {
     "three": "^0.115.0"
+  },
+  "dependencies": {
+    "dxf-parser": "1.0.0-alpha.2"
   }
 }
