@@ -6,7 +6,23 @@
  */
 
 import * as THREE from 'three';
+import { Base64 } from 'js-base64'
 import DxfParser from 'dxf-parser';
+
+function decodeDataUri(uri) {
+    if (uri) {
+        const mime = uri.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/);
+        if (mime && mime.length > 0) {
+            const type = mime[1];
+            const data = uri.replace('data:' + type + ';', '').split(',');
+            if (data && data.length === 2 && data[0] === 'base64') {
+                const byteString = data[1];
+                return Base64.decode(byteString);
+            }
+        }
+    }
+    return null
+}
 
 /**
  * Returns the angle in radians of the vector (p1,p2). In other words, imagine
@@ -101,20 +117,30 @@ DXFLoader.prototype = Object.assign( Object.create( THREE.Loader.prototype ), {
         var scope = this;
 		var loader = new THREE.XHRLoader( scope.manager );
 
-		loader.setPath( scope.path );
-		loader.load( url, ( text ) => {
-            try {
-                onLoad(scope.parse(text))
-            } catch (error) {
-                if (onError) {
-                    onError(error)
-                } else {
-                    console.error(error)
-                }
-                scope.manager.itemError(url)
-            }
-		}, onProgress, onError );
+        loader.setPath( scope.path );
+        // Test if it is a data-uri
+        const text = decodeDataUri(url)
+        if (text) {
+            scope.loadString( text, onLoad, onError );
+        } else {
+            loader.load( url, ( text ) => {
+                scope.loadString( text, onLoad, onError );
+            }, onProgress, onError );
+        }
+    },
 
+    loadString: function ( text, onLoad, onError ) {
+        var scope = this;
+        try {
+            onLoad(scope.parse(text))
+        } catch (error) {
+            if (onError) {
+                onError(error)
+            } else {
+                console.error(error)
+            }
+            scope.manager.itemError(url)
+        }
     },
 
     parse: function ( text ) {
