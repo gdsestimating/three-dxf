@@ -339,14 +339,19 @@ export function Viewer(data, parent, width, height, font) {
         var interpolatedPoints = [];
         var curve;
         if (entity.degreeOfSplineCurve === 2 || entity.degreeOfSplineCurve === 3) {
-            for(var i = 0; i + 2 < points.length; i = i + 2) {
-        if (entity.degreeOfSplineCurve === 2) {
-                        curve = new THREE.QuadraticBezierCurve(points[i], points[i + 1], points[i + 2]);
-        } else {
-            curve = new THREE.QuadraticBezierCurve3(points[i], points[i + 1], points[i + 2]);
-        }
+            var i = 0
+	    for(i = 0; i + 2 < points.length; i = i + 2) {
+		if (entity.degreeOfSplineCurve === 2) {
+		    curve = new THREE.QuadraticBezierCurve(points[i], points[i + 1], points[i + 2]);
+		} else {
+		    curve = new THREE.QuadraticBezierCurve3(points[i], points[i + 1], points[i + 2]);
+		}
                 interpolatedPoints.push.apply(interpolatedPoints, curve.getPoints(50));
             }
+	    if (i < points.length) {
+		curve = new THREE.QuadraticBezierCurve3(points[i], points[i + 1], points[i + 1]);
+                interpolatedPoints.push.apply(interpolatedPoints, curve.getPoints(50));
+	    }
         } else {
             curve = new THREE.SplineCurve(points);
             interpolatedPoints = curve.getPoints( 100 );
