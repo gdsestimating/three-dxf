@@ -109,8 +109,8 @@ export function Viewer(data, parent, width, height, font) {
         obj = null;
     }
 
-    width = width || parent.innerWidth;
-    height = height || parent.innerHeight;
+    width = width || parent.clientWidth;
+    height = height || parent.clientHeight;
     var aspectRatio = width / height;
 
     var upperRightCorner = { x: dims.max.x, y: dims.max.y };
@@ -251,6 +251,8 @@ export function Viewer(data, parent, width, height, font) {
     function drawMtext(entity, data) {
         var color = getColor(entity, data);
 
+        if (!font) { return console.log('font parameter not set. Ignoring text entity.')}
+
         var geometry = new THREE.TextGeometry( entity.text, {
             font: font,
             size: entity.height * (4/5),
@@ -364,6 +366,8 @@ export function Viewer(data, parent, width, height, font) {
             color = getColor(entity, data),
             material, lineType, vertex, startPoint, endPoint, bulgeGeometry,
             bulge, i, line;
+
+        if (!entity.vertices) return console.log('entity missing vertices.');
 
         // create geometry
         for(i = 0; i < entity.vertices.length; i++) {

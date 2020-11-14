@@ -1,12 +1,12 @@
 {
   "name": "three-dxf",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0",
   "description": "A dxf viewer for the browser using three.js.",
   "main": "dist/three-dxf.js",
   "module": "src/index.js",
   "scripts": {
-    "build-dev": "webpack --mode development",
-    "build": "webpack --mode production"
+    "build-dev": "webpack --mode development webpack.dev.js",
+    "build": "webpack --config webpack.prod.js"
   },
   "repository": {
     "type": "git",

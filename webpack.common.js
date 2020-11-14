@@ -12,5 +12,4 @@ module.exports = {
     externals: {
         three: 'THREE'
     },
-    devtool: 'eval-source-map'
 };
