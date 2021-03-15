@@ -53,8 +53,8 @@ export function Viewer(data, parent, width, height, font) {
     obj = null;
   }
 
-  width = width || parent.innerWidth;
-  height = height || parent.innerHeight;
+  width = width || parent.clientWidth;
+  height = height || parent.clientHeight;
   var aspectRatio = width / height;
 
   var upperRightCorner = { x: dims.max.x, y: dims.max.y };
