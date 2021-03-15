@@ -1,12 +1,12 @@
 {
   "name": "three-dxf-loader",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Cross platform DXF loader for three.js. Out of the box usable with react-three-fibre.",
   "main": "dist/three-dxf-loader.js",
   "scripts": {
     "build-dev": "webpack --mode development webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
-    "prettier:fix": "prettier src/**/*.js --write"
+    "prettier": "prettier src/**/*.js --write"
   },
   "repository": {
     "type": "git",

@@ -56,7 +56,7 @@ loader.load(url, onLoad, onProgress, onError);
 After performing the steps above, you can see the example at [http://127.0.0.1:8080/sample/index.html](http://127.0.0.1:8080/sample/index.html). You can use the DXF file included in the sample. **NOTE: the latest version of http-server will go into a redirect loop if you exclude "/index.html" from the url.**
 
 
-#### Supported DXF Features
+### Supported DXF Features
 Supports:
 * Header
 * Most LW entities (lines, polylines, circles, etc)
@@ -73,4 +73,8 @@ Does not yet support:
 * All types of Leaders
 * MText
 * other less common objects and entities.
+
+## License
+
+[The MIT License](http://opensource.org/licenses/MIT)
 

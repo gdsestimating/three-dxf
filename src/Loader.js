@@ -216,6 +216,8 @@ DXFLoader.prototype = Object.assign(Object.create(THREE.Loader.prototype), {
         } else {
           console.log("Unsupported Dimension type: " + dimTypeEnum);
         }
+      } else if (entity.type === "3DFACE") {
+        console.log("Unsupported Entity Type: " + entity.type, entity);
       } else {
         console.log("Unsupported Entity Type: " + entity.type);
       }
