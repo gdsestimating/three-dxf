@@ -109,8 +109,8 @@ export function Viewer(data, parent, width, height, font) {
         obj = null;
     }
 
-    width = width || parent.innerWidth;
-    height = height || parent.innerHeight;
+    width = width || parent.clientWidth;
+    height = height || parent.clientHeight;
     var aspectRatio = width / height;
 
     var upperRightCorner = { x: dims.max.x, y: dims.max.y };
@@ -251,6 +251,8 @@ export function Viewer(data, parent, width, height, font) {
     function drawMtext(entity, data) {
         var color = getColor(entity, data);
 
+        if (!font) { return console.log('font parameter not set. Ignoring text entity.')}
+
         var geometry = new THREE.TextGeometry( entity.text, {
             font: font,
             size: entity.height * (4/5),
@@ -339,14 +341,19 @@ export function Viewer(data, parent, width, height, font) {
         var interpolatedPoints = [];
         var curve;
         if (entity.degreeOfSplineCurve === 2 || entity.degreeOfSplineCurve === 3) {
-            for(var i = 0; i + 2 < points.length; i = i + 2) {
-        if (entity.degreeOfSplineCurve === 2) {
-                        curve = new THREE.QuadraticBezierCurve(points[i], points[i + 1], points[i + 2]);
-        } else {
-            curve = new THREE.QuadraticBezierCurve3(points[i], points[i + 1], points[i + 2]);
-        }
+            var i = 0
+	    for(i = 0; i + 2 < points.length; i = i + 2) {
+		if (entity.degreeOfSplineCurve === 2) {
+		    curve = new THREE.QuadraticBezierCurve(points[i], points[i + 1], points[i + 2]);
+		} else {
+		    curve = new THREE.QuadraticBezierCurve3(points[i], points[i + 1], points[i + 2]);
+		}
                 interpolatedPoints.push.apply(interpolatedPoints, curve.getPoints(50));
             }
+	    if (i < points.length) {
+		curve = new THREE.QuadraticBezierCurve3(points[i], points[i + 1], points[i + 1]);
+                interpolatedPoints.push.apply(interpolatedPoints, curve.getPoints(50));
+	    }
         } else {
             curve = new THREE.SplineCurve(points);
             interpolatedPoints = curve.getPoints( 100 );
@@ -364,6 +371,8 @@ export function Viewer(data, parent, width, height, font) {
             color = getColor(entity, data),
             material, lineType, vertex, startPoint, endPoint, bulgeGeometry,
             bulge, i, line;
+
+        if (!entity.vertices) return console.log('entity missing vertices.');
 
         // create geometry
         for(i = 0; i < entity.vertices.length; i++) {
