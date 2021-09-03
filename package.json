@@ -24,7 +24,8 @@
   "license": "MIT",
   "devDependencies": {
     "webpack": "^4.29.5",
-    "webpack-cli": "^3.2.3"
+    "webpack-cli": "^3.2.3",
+    "webpack-merge": "^5.8.0"
   },
   "peerDependencies": {
     "three": "0.x.x"
