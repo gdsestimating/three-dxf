@@ -51,11 +51,12 @@ Supports:
 * Viewport
 * Splines (Quadratic and Cubic)
 * Ellipses
+* MText (Single line content only)
  
 Does not yet support:
 * Attributes
 * 3DSolids
 * All types of Leaders
-* MText
+* MText (Multi-line content is not yet supported/rendered)
 * other less common objects and entities.
 
