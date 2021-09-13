@@ -255,7 +255,7 @@ export function Viewer(data, parent, width, height, font) {
 
         var geometry = new THREE.TextGeometry( entity.text, {
             font: font,
-            size: entity.height * (4/5),
+            size: entity.height,
             height: 1
         });
         var material = new THREE.MeshBasicMaterial( {color: color} );
