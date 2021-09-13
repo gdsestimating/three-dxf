@@ -1,15 +1,15 @@
 
 var progress = document.getElementById('file-progress-bar');
-var $progress = $('.progress');
+var $progress = document.getElementsByClassName('progress')[0];
 
-var $cadview = $('#cad-view');
-var dxfContentEl = $('#dxf-content')[0];
+var $cadview = document.getElementById('cad-view');
+var dxfContentEl = document.getElementById('dxf-content');
 var cadCanvas;
 
-// Setup the dnd listeners.
-var dropZone = $('.drop-zone');
-dropZone.on('dragover', handleDragOver, false);
-dropZone.on('drop', onFileSelected, false);
+// Setup the drag and drop file listeners.
+// var dropZone = document.getElementById('drop-zone');
+// dropZone.addEventListener('dragover', handleDragOver, false);
+// dropZone.addEventListener('drop', onFileSelected, false);
 
 document.getElementById('dxf').addEventListener('change', onFileSelected, false);
 
@@ -26,7 +26,7 @@ function onFileSelected(evt) {
         '</li>');
     document.getElementById('file-description').innerHTML = '<ul>' + output.join('') + '</ul>';
 
-    $progress.addClass('loading');
+    $progress.classList.add('loading');
 
     var reader = new FileReader();
     reader.onprogress = updateProgress;
@@ -72,7 +72,7 @@ function onSuccess(evt){
     if(fileReader.error) return console.log("error onloadend!?");
     progress.style.width = '100%';
     progress.textContent = '100%';
-    setTimeout(function() { $progress.removeClass('loading'); }, 2000);
+    setTimeout(function() { $progress.classList.remove('loading'); }, 2000);
     var parser = new window.DxfParser();
     var dxf = parser.parseSync(fileReader.result);
     
