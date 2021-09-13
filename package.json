@@ -5,8 +5,8 @@
   "main": "dist/three-dxf.js",
   "module": "src/index.js",
   "scripts": {
-    "build-dev": "webpack --mode development webpack.dev.js",
-    "build": "webpack --config webpack.prod.js"
+    "build-dev": "webpack -c webpack.dev.js",
+    "build": "webpack -c webpack.prod.js"
   },
   "repository": {
     "type": "git",
@@ -23,8 +23,8 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "webpack": "^4.29.5",
-    "webpack-cli": "^3.2.3",
+    "webpack": "^5.52.1",
+    "webpack-cli": "^4.8.0",
     "webpack-merge": "^5.8.0"
   },
   "peerDependencies": {
