@@ -333,6 +333,15 @@ export function Viewer(data, parent, width, height, font) {
 
     function drawSpline(entity, data) {
         var color = getColor(entity, data);
+        if (!entity.controlPoints) {
+            console.log('Spline "' + entity.handle + '" skipped because three-dxf requires them to be drawn with controlPoints');
+            return null;
+        }
+
+        if (entity.controlPoints.length > 4) {
+            console.log('Spline "' + entity.handle + '" with ' + entity.controlPoints.length + ' control points will not be drawn. Three-DXF is only capable of handling a maximum of 4 controls points.');
+            return null;
+        }
 
         var points = entity.controlPoints.map(function (vec) {
             return new THREE.Vector2(vec.x, vec.y);
@@ -340,24 +349,13 @@ export function Viewer(data, parent, width, height, font) {
 
         var interpolatedPoints = [];
         var curve;
-        if (entity.degreeOfSplineCurve === 3) {
-            var i = 0
-            for (i = 0; i + 2 < points.length; i = i + 2) {
-                if (entity.degreeOfSplineCurve === 2) {
-                    curve = new THREE.QuadraticBezierCurve(points[i], points[i + 1], points[i + 2]);
-                } else {
-                    curve = new THREE.QuadraticBezierCurve3(points[i], points[i + 1], points[i + 2]);
-                }
-                interpolatedPoints.push.apply(interpolatedPoints, curve.getPoints(50));
-            }
-            if (i < points.length) {
-                curve = new THREE.QuadraticBezierCurve3(points[i], points[i + 1], points[i + 1]);
-                interpolatedPoints.push.apply(interpolatedPoints, curve.getPoints(50));
-            }
+        var i = 0
+        if (entity.degreeOfSplineCurve === 2) {
+            curve = new THREE.QuadraticBezierCurve(points[i], points[i + 1], points[i + 2]);
         } else {
-            curve = new THREE.SplineCurve(points);
-            interpolatedPoints = curve.getPoints(100);
+            curve = new THREE.CubicBezierCurve(points[i], points[i + 1], points[i + 2], points[i + 3]);
         }
+        interpolatedPoints.push.apply(interpolatedPoints, curve.getPoints(50));
 
         var geometry = new THREE.BufferGeometry().setFromPoints(interpolatedPoints);
         var material = new THREE.LineBasicMaterial({ linewidth: 1, color: color });
