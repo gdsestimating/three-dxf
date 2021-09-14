@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { BufferGeometry, Color, Float32BufferAttribute, Vector3 } from 'three';
 import { OrbitControls } from './OrbitControls';
 
 // Three.js extension functions. Webpack doesn't seem to like it if we modify the THREE object directly.
@@ -29,20 +30,18 @@ THREEx.Math.polar = function (point, distance, angle) {
 };
 
 /**
- * Calculates points for a curve between two points
+ * Calculates points for a curve between two points using a bulge value. Typically used in polylines.
  * @param startPoint - the starting point of the curve
  * @param endPoint - the ending point of the curve
  * @param bulge - a value indicating how much to curve
  * @param segments - number of segments between the two given points
  */
-THREEx.BulgeGeometry = function (startPoint, endPoint, bulge, segments) {
+function getBulgeCurvePoints(startPoint, endPoint, bulge, segments) {
 
     var vertex, i,
         center, p0, p1, angle,
         radius, startAngle,
         thetaAngle;
-
-    THREE.Geometry.call(this);
 
     this.startPoint = p0 = startPoint ? new THREE.Vector2(startPoint.x, startPoint.y) : new THREE.Vector2(0, 0);
     this.endPoint = p1 = endPoint ? new THREE.Vector2(endPoint.x, endPoint.y) : new THREE.Vector2(1, 0);
@@ -56,20 +55,17 @@ THREEx.BulgeGeometry = function (startPoint, endPoint, bulge, segments) {
     startAngle = THREEx.Math.angle2(center, p0);
     thetaAngle = angle / segments;
 
+    var vertices = [];
 
-    this.vertices.push(new THREE.Vector3(p0.x, p0.y, 0));
+    vertices.push(new THREE.Vector3(p0.x, p0.y, 0));
 
     for (i = 1; i <= segments - 1; i++) {
-
         vertex = THREEx.Math.polar(center, Math.abs(radius), startAngle + thetaAngle * i);
-
-        this.vertices.push(new THREE.Vector3(vertex.x, vertex.y, 0));
-
+        vertices.push(new THREE.Vector3(vertex.x, vertex.y, 0));
     }
 
+    return vertices;
 };
-
-THREEx.BulgeGeometry.prototype = Object.create(THREE.Geometry.prototype);
 
 /**
  * Viewer class for a dxf object.
@@ -365,9 +361,9 @@ export function Viewer(data, parent, width, height, font) {
     }
 
     function drawLine(entity, data) {
-        var geometry = new THREE.Geometry(),
-            color = getColor(entity, data),
-            material, lineType, vertex, startPoint, endPoint, bulgeGeometry,
+        let points = [];
+        let color = getColor(entity, data);
+        var material, lineType, vertex, startPoint, endPoint, bulgeGeometry,
             bulge, i, line;
 
         if (!entity.vertices) return console.log('entity missing vertices.');
@@ -378,18 +374,18 @@ export function Viewer(data, parent, width, height, font) {
             if (entity.vertices[i].bulge) {
                 bulge = entity.vertices[i].bulge;
                 startPoint = entity.vertices[i];
-                endPoint = i + 1 < entity.vertices.length ? entity.vertices[i + 1] : geometry.vertices[0];
+                endPoint = i + 1 < entity.vertices.length ? entity.vertices[i + 1] : points[0];
 
-                bulgeGeometry = new THREEx.BulgeGeometry(startPoint, endPoint, bulge);
+                bulgePoints = getBulgeCurvePoints(startPoint, endPoint, bulge);
 
-                geometry.vertices.push.apply(geometry.vertices, bulgeGeometry.vertices);
+                points.push.apply(points, bulgePoints);
             } else {
                 vertex = entity.vertices[i];
-                geometry.vertices.push(new THREE.Vector3(vertex.x, vertex.y, 0));
+                points.push(new THREE.Vector3(vertex.x, vertex.y, 0));
             }
 
         }
-        if (entity.shape) geometry.vertices.push(geometry.vertices[0]);
+        if (entity.shape) points.push(points[0]);
 
 
         // set material
@@ -403,22 +399,7 @@ export function Viewer(data, parent, width, height, font) {
             material = new THREE.LineBasicMaterial({ linewidth: 1, color: color });
         }
 
-        // if(lineType && lineType.pattern && lineType.pattern.length !== 0) {
-
-        //           geometry.computeLineDistances();
-
-        //           // Ugly hack to add diffuse to this. Maybe copy the uniforms object so we
-        //           // don't add diffuse to a material.
-        //           lineType.material.uniforms.diffuse = { type: 'c', value: new THREE.Color(color) };
-
-        // 	material = new THREE.ShaderMaterial({
-        // 		uniforms: lineType.material.uniforms,
-        // 		vertexShader: lineType.material.vertexShader,
-        // 		fragmentShader: lineType.material.fragmentShader
-        // 	});
-        // }else {
-        // 	material = new THREE.LineBasicMaterial({ linewidth: 1, color: color });
-        // }
+        var geometry = new BufferGeometry().setFromPoints(points);
 
         line = new THREE.Line(geometry, material);
         return line;
@@ -453,37 +434,40 @@ export function Viewer(data, parent, width, height, font) {
         return arc;
     }
 
-    function drawSolid(entity, data) {
-        var material, mesh, verts,
-            geometry = new THREE.Geometry();
-
-        verts = geometry.vertices;
-        verts.push(new THREE.Vector3(entity.points[0].x, entity.points[0].y, entity.points[0].z));
-        verts.push(new THREE.Vector3(entity.points[1].x, entity.points[1].y, entity.points[1].z));
-        verts.push(new THREE.Vector3(entity.points[2].x, entity.points[2].y, entity.points[2].z));
-        verts.push(new THREE.Vector3(entity.points[3].x, entity.points[3].y, entity.points[3].z));
-
+    function addTriangleFacingCamera(verts, p0, p1, p2) {
         // Calculate which direction the points are facing (clockwise or counter-clockwise)
-        var vector1 = new THREE.Vector3();
-        var vector2 = new THREE.Vector3();
-        vector1.subVectors(verts[1], verts[0]);
-        vector2.subVectors(verts[2], verts[0]);
+        var vector1 = new Vector3();
+        var vector2 = new Vector3();
+        vector1.subVectors(p1, p0);
+        vector2.subVectors(p2, p0);
         vector1.cross(vector2);
+
+        var v0 = new Vector3(p0.x, p0.y, p0.z);
+        var v1 = new Vector3(p1.x, p1.y, p1.z);
+        var v2 = new Vector3(p2.x, p2.y, p2.z);
 
         // If z < 0 then we must draw these in reverse order
         if (vector1.z < 0) {
-            geometry.faces.push(new THREE.Face3(2, 1, 0));
-            geometry.faces.push(new THREE.Face3(2, 3, 1));
+            verts.push(v2, v1, v0);
         } else {
-            geometry.faces.push(new THREE.Face3(0, 1, 2));
-            geometry.faces.push(new THREE.Face3(1, 3, 2));
+            verts.push(v0, v1, v2);
         }
+    }
 
+    function drawSolid(entity, data) {
+        var material, verts,
+            geometry = new THREE.BufferGeometry();
 
+        var points = entity.points;
+        // verts = geometry.vertices;
+        verts = [];
+        addTriangleFacingCamera(verts, points[0], points[1], points[2]);
+        addTriangleFacingCamera(verts, points[1], points[2], points[3]);
+        
         material = new THREE.MeshBasicMaterial({ color: getColor(entity, data) });
+        geometry.setFromPoints(verts);
 
         return new THREE.Mesh(geometry, material);
-
     }
 
     function drawText(entity, data) {
@@ -512,24 +496,13 @@ export function Viewer(data, parent, width, height, font) {
     function drawPoint(entity, data) {
         var geometry, material, point;
 
-        geometry = new THREE.Geometry();
+        geometry = new THREE.BufferGeometry();
 
-        geometry.vertices.push(new THREE.Vector3(entity.position.x, entity.position.y, entity.position.z));
-
-        // TODO: could be more efficient. PointCloud per layer?
-
-        var numPoints = 1;
+        geometry.setAttribute('position', new Float32BufferAttribute([entity.position.x, entity.position.y, entity.position.z], 3));
 
         var color = getColor(entity, data);
-        var colors = new Float32Array(numPoints * 3);
-        colors[0] = color.r;
-        colors[1] = color.g;
-        colors[2] = color.b;
 
-        geometry.colors = colors;
-        geometry.computeBoundingBox();
-
-        material = new THREE.PointsMaterial({ size: 0.05, vertexColors: THREE.VertexColors });
+        material = new THREE.PointsMaterial({ size: 0.1, color: new Color(color) });
         point = new THREE.Points(geometry, material);
         scene.add(point);
     }
