@@ -5,3 +5,5 @@ typings/
 build/
 .vscode/
 dist/
+sample/node_modules/
+*.tgz
