@@ -36,5 +36,7 @@
     "cad",
     "viewer"
   ],
-  "dependencies": {}
+  "dependencies": {
+    "troika-three-text": "^0.42.0"
+  }
 }

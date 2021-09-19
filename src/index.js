@@ -2,6 +2,9 @@ import * as THREE from 'three';
 import { BufferGeometry, Color, Float32BufferAttribute, Vector3 } from 'three';
 import { OrbitControls } from './OrbitControls';
 import bSpline from './bspline';
+import {Text} from 'troika-three-text'
+
+const textControlCharactersRegex = /\\[AXQWOoLIpfH].*;/g;
 
 // Three.js extension functions. Webpack doesn't seem to like it if we modify the THREE object directly.
 var THREEx = { Math: {} };
@@ -250,75 +253,65 @@ export function Viewer(data, parent, width, height, font) {
 
         if (!font) { return console.log('font parameter not set. Ignoring text entity.') }
 
-        var geometry = new THREE.TextGeometry(entity.text, {
-            font: font,
-            size: entity.height,
-            height: 1
-        });
-        var material = new THREE.MeshBasicMaterial({ color: color });
-        var text = new THREE.Mesh(geometry, material);
-
-        // Measure what we rendered.
-        var measure = new THREE.Box3();
-        measure.setFromObject(text);
-
-        var textWidth = measure.max.x - measure.min.x;
-
-        // If the text ends up being wider than the box, it's supposed
-        // to be multiline. Doing that in threeJS is overkill.
-        if (textWidth > entity.width && entity.width !== 0) {
-            console.log("Can't render this multipline MTEXT entity, sorry.", entity);
-            return null;
+        var text = new Text();
+        text.text = entity.text.replaceAll(textControlCharactersRegex, '').replaceAll('\\P', '\n');
+        text.font = font;
+        text.fontSize = entity.height;
+        text.maxWidth = entity.width;
+        text.position.x = entity.position.x;
+        text.position.y = entity.position.y;
+        text.position.z = entity.position.z;
+        text.color = color;
+        if (entity.rotation) {
+            text.rotation.z = entity.rotation * Math.PI / 180;
         }
-
-        text.position.z = 0;
         switch (entity.attachmentPoint) {
             case 1:
                 // Top Left
-                text.position.x = entity.position.x;
-                text.position.y = entity.position.y - entity.height;
+                text.anchorX = 'left';
+                text.anchorY = 'top';
                 break;
             case 2:
                 // Top Center
-                text.position.x = entity.position.x - textWidth / 2;
-                text.position.y = entity.position.y - entity.height;
+                text.anchorX = 'center';
+                text.anchorY = 'top';
                 break;
             case 3:
                 // Top Right
-                text.position.x = entity.position.x - textWidth;
-                text.position.y = entity.position.y - entity.height;
+                text.anchorX = 'right';
+                text.anchorY = 'top';
                 break;
 
             case 4:
                 // Middle Left
-                text.position.x = entity.position.x;
-                text.position.y = entity.position.y - entity.height / 2;
+                text.anchorX = 'left';
+                text.anchorY = 'middle';
                 break;
             case 5:
                 // Middle Center
-                text.position.x = entity.position.x - textWidth / 2;
-                text.position.y = entity.position.y - entity.height / 2;
+                text.anchorX = 'center';
+                text.anchorY = 'middle';
                 break;
             case 6:
                 // Middle Right
-                text.position.x = entity.position.x - textWidth;
-                text.position.y = entity.position.y - entity.height / 2;
+                text.anchorX = 'right';
+                text.anchorY = 'middle';
                 break;
 
             case 7:
                 // Bottom Left
-                text.position.x = entity.position.x;
-                text.position.y = entity.position.y;
+                text.anchorX = 'left';
+                text.anchorY = 'bottom';
                 break;
             case 8:
                 // Bottom Center
-                text.position.x = entity.position.x - textWidth / 2;
-                text.position.y = entity.position.y;
+                text.anchorX = 'center';
+                text.anchorY = 'bottom';
                 break;
             case 9:
                 // Bottom Right
-                text.position.x = entity.position.x - textWidth;
-                text.position.y = entity.position.y;
+                text.anchorX = 'right';
+                text.anchorY = 'bottom';
                 break;
 
             default:
