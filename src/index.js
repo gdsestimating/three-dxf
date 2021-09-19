@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { BufferGeometry, Color, Float32BufferAttribute, Vector3 } from 'three';
 import { OrbitControls } from './OrbitControls';
+import bSpline from './bspline';
 
 // Three.js extension functions. Webpack doesn't seem to like it if we modify the THREE object directly.
 var THREEx = { Math: {} };
@@ -265,9 +266,9 @@ export function Viewer(data, parent, width, height, font) {
 
         // If the text ends up being wider than the box, it's supposed
         // to be multiline. Doing that in threeJS is overkill.
-        if (textWidth > entity.width) {
+        if (textWidth > entity.width && entity.width !== 0) {
             console.log("Can't render this multipline MTEXT entity, sorry.", entity);
-            return undefined;
+            return null;
         }
 
         text.position.z = 0;
@@ -329,35 +330,57 @@ export function Viewer(data, parent, width, height, font) {
 
     function drawSpline(entity, data) {
         var color = getColor(entity, data);
-        if (!entity.controlPoints) {
-            console.log('Spline "' + entity.handle + '" skipped because three-dxf requires them to be drawn with controlPoints');
-            return null;
-        }
+        
+        var points = getBSplinePolyline(entity.controlPoints, entity.degreeOfSplineCurve, entity.knotValues, 100);
 
-        if (entity.controlPoints.length > 4) {
-            console.log('Spline "' + entity.handle + '" with ' + entity.controlPoints.length + ' control points will not be drawn. Three-DXF is only capable of handling a maximum of 4 controls points.');
-            return null;
-        }
-
-        var points = entity.controlPoints.map(function (vec) {
-            return new THREE.Vector2(vec.x, vec.y);
-        });
-
-        var interpolatedPoints = [];
-        var curve;
-        var i = 0
-        if (entity.degreeOfSplineCurve === 2) {
-            curve = new THREE.QuadraticBezierCurve(points[i], points[i + 1], points[i + 2]);
-        } else {
-            curve = new THREE.CubicBezierCurve(points[i], points[i + 1], points[i + 2], points[i + 3]);
-        }
-        interpolatedPoints.push.apply(interpolatedPoints, curve.getPoints(50));
-
-        var geometry = new THREE.BufferGeometry().setFromPoints(interpolatedPoints);
+        var geometry = new THREE.BufferGeometry().setFromPoints(points);
         var material = new THREE.LineBasicMaterial({ linewidth: 1, color: color });
         var splineObject = new THREE.Line(geometry, material);
 
         return splineObject;
+    }
+
+    /**
+ * Interpolate a b-spline. The algorithm examins the knot vector
+ * to create segments for interpolation. The parameterisation value
+ * is re-normalised back to [0,1] as that is what the lib expects (
+ * and t i de-normalised in the b-spline library)
+ *
+ * @param controlPoints the control points
+ * @param degree the b-spline degree
+ * @param knots the knot vector
+ * @returns the polyline
+ */
+    function getBSplinePolyline(controlPoints, degree, knots, interpolationsPerSplineSegment, weights) {
+        const polyline = []
+        const controlPointsForLib = controlPoints.map(function (p) {
+            return [p.x, p.y]
+        })
+
+        const segmentTs = [knots[degree]]
+        const domain = [knots[degree], knots[knots.length - 1 - degree]]
+
+        for (let k = degree + 1; k < knots.length - degree; ++k) {
+            if (segmentTs[segmentTs.length - 1] !== knots[k]) {
+                segmentTs.push(knots[k])
+            }
+        }
+
+        interpolationsPerSplineSegment = interpolationsPerSplineSegment || 25
+        for (let i = 1; i < segmentTs.length; ++i) {
+            const uMin = segmentTs[i - 1]
+            const uMax = segmentTs[i]
+            for (let k = 0; k <= interpolationsPerSplineSegment; ++k) {
+                const u = k / interpolationsPerSplineSegment * (uMax - uMin) + uMin
+                // Clamp t to 0, 1 to handle numerical precision issues
+                let t = (u - domain[0]) / (domain[1] - domain[0])
+                t = Math.max(t, 0)
+                t = Math.min(t, 1)
+                const p = bSpline(t, degree, controlPointsForLib, knots, weights)
+                polyline.push(new THREE.Vector2(p[0], p[1]));
+            }
+        }
+        return polyline
     }
 
     function drawLine(entity, data) {
@@ -463,7 +486,7 @@ export function Viewer(data, parent, width, height, font) {
         verts = [];
         addTriangleFacingCamera(verts, points[0], points[1], points[2]);
         addTriangleFacingCamera(verts, points[1], points[2], points[3]);
-        
+
         material = new THREE.MeshBasicMaterial({ color: getColor(entity, data) });
         geometry.setFromPoints(verts);
 

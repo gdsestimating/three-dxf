@@ -6,7 +6,7 @@
   "license": "MIT",
   "devDependencies": {},
   "dependencies": {
-    "dxf-parser": "1.0.0-alpha.1",
+    "dxf-parser": "1.0.0",
     "three": "^0.132.2"
   }
 }
