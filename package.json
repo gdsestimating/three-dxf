@@ -37,6 +37,7 @@
     "viewer"
   ],
   "dependencies": {
+    "@dxfom/mtext": "^0.3.2",
     "troika-three-text": "^0.42.0"
   }
 }

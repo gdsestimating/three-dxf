@@ -3,8 +3,10 @@ import { BufferGeometry, Color, Float32BufferAttribute, Vector3 } from 'three';
 import { OrbitControls } from './OrbitControls';
 import bSpline from './bspline';
 import {Text} from 'troika-three-text'
+import { parseDxfMTextContent } from '@dxfom/mtext';
 
 const textControlCharactersRegex = /\\[AXQWOoLIpfH].*;/g;
+const curlyBraces = /\\[{}]/g;
 
 // Three.js extension functions. Webpack doesn't seem to like it if we modify the THREE object directly.
 var THREEx = { Math: {} };
@@ -253,72 +255,132 @@ export function Viewer(data, parent, width, height, font) {
 
         if (!font) { return console.log('font parameter not set. Ignoring text entity.') }
 
-        var text = new Text();
-        text.text = entity.text.replaceAll(textControlCharactersRegex, '').replaceAll('\\P', '\n');
-        text.font = font;
-        text.fontSize = entity.height;
-        text.maxWidth = entity.width;
-        text.position.x = entity.position.x;
-        text.position.y = entity.position.y;
-        text.position.z = entity.position.z;
-        text.color = color;
+        var textAndControlChars = parseDxfMTextContent(entity.text);
+
+        //Note: We currently only support a single format applied to all the mtext text
+        var content = mtextContentAndFormattingToTextAndStyle(textAndControlChars, entity, color);
+
+        var txt = createTextForScene(content.text, content.style, entity, color);
+        var group = new THREE.Group();
+        group.add(txt);
+        group.add(THREE.poly)
+    }
+
+    function mtextContentAndFormattingToTextAndStyle(textAndControlChars, entity, color) {
+        let activeStyle = {
+            horizontalAlignment: 'left',
+            textHeight: entity.height
+        }
+
+        var text = [];
+        for(let item of textAndControlChars) {
+            if (typeof item === 'string') {
+                if (item.startsWith('pxq') && item.endsWith(';')) {
+                    if (item.indexOf('c') !== -1)
+                        activeStyle.horizontalAlignment = 'center';
+                    else if (item.indexOf('l') !== -1)
+                        activeStyle.horizontalAlignment = 'left';
+                    else if (item.indexOf('r') !== -1)
+                        activeStyle.horizontalAlignment = 'right';
+                    else if (item.indexOf('j') !== -1)
+                        activeStyle.horizontalAlignment = 'justify';
+                } else {
+                    text.push(item);
+                }
+            } else if (Array.isArray(item)) {
+                var nestedFormat = mtextContentAndFormattingToTextAndStyle(item, entity, color);
+                text.push(nestedFormat.text);
+            } else if (typeof item === 'object') {
+                if (item['S'] && item['S'].length === 3) {
+                    text.push(item['S'][0] + '/' + item['S'][2]);
+                } else {
+                    // not yet supported.
+                }
+            }
+        }
+        return {
+            text: text.join(),
+            style: activeStyle
+        }
+    }
+
+    function createTextForScene(text, style, entity, color) {
+        if (!text) return null;
+
+        let textEnt = new Text();
+        textEnt.text = text
+            .replaceAll('\\P', '\n')
+            .replaceAll('\\X', '\n');
+
+        textEnt.font = font;
+        textEnt.fontSize = style.textHeight;
+        textEnt.maxWidth = entity.width;
+        textEnt.position.x = entity.position.x;
+        textEnt.position.y = entity.position.y;
+        textEnt.position.z = entity.position.z;
+        textEnt.textAlign = style.horizontalAlignment;
+        textEnt.color = color;
         if (entity.rotation) {
-            text.rotation.z = entity.rotation * Math.PI / 180;
+            textEnt.rotation.z = entity.rotation * Math.PI / 180;
+        }
+        if (entity.directionVector) {
+            var dv = entity.directionVector;
+            textEnt.rotation.z = new THREE.Vector3(1, 0, 0).angleTo(new THREE.Vector3(dv.x, dv.y, dv.z));
         }
         switch (entity.attachmentPoint) {
             case 1:
                 // Top Left
-                text.anchorX = 'left';
-                text.anchorY = 'top';
+                textEnt.anchorX = 'left';
+                textEnt.anchorY = 'top';
                 break;
             case 2:
                 // Top Center
-                text.anchorX = 'center';
-                text.anchorY = 'top';
+                textEnt.anchorX = 'center';
+                textEnt.anchorY = 'top';
                 break;
             case 3:
                 // Top Right
-                text.anchorX = 'right';
-                text.anchorY = 'top';
+                textEnt.anchorX = 'right';
+                textEnt.anchorY = 'top';
                 break;
 
             case 4:
                 // Middle Left
-                text.anchorX = 'left';
-                text.anchorY = 'middle';
+                textEnt.anchorX = 'left';
+                textEnt.anchorY = 'middle';
                 break;
             case 5:
                 // Middle Center
-                text.anchorX = 'center';
-                text.anchorY = 'middle';
+                textEnt.anchorX = 'center';
+                textEnt.anchorY = 'middle';
                 break;
             case 6:
                 // Middle Right
-                text.anchorX = 'right';
-                text.anchorY = 'middle';
+                textEnt.anchorX = 'right';
+                textEnt.anchorY = 'middle';
                 break;
 
             case 7:
                 // Bottom Left
-                text.anchorX = 'left';
-                text.anchorY = 'bottom';
+                textEnt.anchorX = 'left';
+                textEnt.anchorY = 'bottom';
                 break;
             case 8:
                 // Bottom Center
-                text.anchorX = 'center';
-                text.anchorY = 'bottom';
+                textEnt.anchorX = 'center';
+                textEnt.anchorY = 'bottom';
                 break;
             case 9:
                 // Bottom Right
-                text.anchorX = 'right';
-                text.anchorY = 'bottom';
+                textEnt.anchorX = 'right';
+                textEnt.anchorY = 'bottom';
                 break;
 
             default:
                 return undefined;
         };
 
-        return text;
+        return textEnt;
     }
 
     function drawSpline(entity, data) {
