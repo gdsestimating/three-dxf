@@ -44,15 +44,16 @@ function getBulgeCurvePoints(startPoint, endPoint, bulge, segments) {
         radius, startAngle,
         thetaAngle;
 
-    this.startPoint = p0 = startPoint ? new THREE.Vector2(startPoint.x, startPoint.y) : new THREE.Vector2(0, 0);
-    this.endPoint = p1 = endPoint ? new THREE.Vector2(endPoint.x, endPoint.y) : new THREE.Vector2(1, 0);
-    this.bulge = bulge = bulge || 1;
+    var obj = {};
+    obj.startPoint = p0 = startPoint ? new THREE.Vector2(startPoint.x, startPoint.y) : new THREE.Vector2(0, 0);
+    obj.endPoint = p1 = endPoint ? new THREE.Vector2(endPoint.x, endPoint.y) : new THREE.Vector2(1, 0);
+    obj.bulge = bulge = bulge || 1;
 
     angle = 4 * Math.atan(bulge);
     radius = p0.distanceTo(p1) / 2 / Math.sin(angle / 2);
     center = THREEx.Math.polar(startPoint, radius, THREEx.Math.angle2(p0, p1) + (Math.PI / 2 - angle / 2));
 
-    this.segments = segments = segments || Math.max(Math.abs(Math.ceil(angle / (Math.PI / 18))), 6); // By default want a segment roughly every 10 degrees
+    obj.segments = segments = segments || Math.max(Math.abs(Math.ceil(angle / (Math.PI / 18))), 6); // By default want a segment roughly every 10 degrees
     startAngle = THREEx.Math.angle2(center, p0);
     thetaAngle = angle / segments;
 
@@ -399,7 +400,7 @@ export function Viewer(data, parent, width, height, font) {
                 startPoint = entity.vertices[i];
                 endPoint = i + 1 < entity.vertices.length ? entity.vertices[i + 1] : points[0];
 
-                bulgePoints = getBulgeCurvePoints(startPoint, endPoint, bulge);
+                let bulgePoints = getBulgeCurvePoints(startPoint, endPoint, bulge);
 
                 points.push.apply(points, bulgePoints);
             } else {
