@@ -263,7 +263,6 @@ export function Viewer(data, parent, width, height, font) {
         var txt = createTextForScene(content.text, content.style, entity, color);
         var group = new THREE.Group();
         group.add(txt);
-        group.add(THREE.poly)
     }
 
     function mtextContentAndFormattingToTextAndStyle(textAndControlChars, entity, color) {
@@ -379,6 +378,12 @@ export function Viewer(data, parent, width, height, font) {
             default:
                 return undefined;
         };
+
+        textEnt.sync(() => {
+            textEnt.geometry.computeBoundingBox();
+            var size = textEnd.geometry.boundingBox.getSize();
+            textEnt.position.x += (entity.width - size.x) / 2;
+        });
 
         return textEnt;
     }
