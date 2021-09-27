@@ -262,8 +262,11 @@ export function Viewer(data, parent, width, height, font) {
         var content = mtextContentAndFormattingToTextAndStyle(textAndControlChars, entity, color);
 
         var txt = createTextForScene(content.text, content.style, entity, color);
-        var group = new THREE.Group();
+        if (!txt) return null;
+        
+        var group = new THREE.Object3D();
         group.add(txt);
+        return group;
     }
 
     function mtextContentAndFormattingToTextAndStyle(textAndControlChars, entity, color) {
@@ -381,9 +384,12 @@ export function Viewer(data, parent, width, height, font) {
         };
 
         textEnt.sync(() => {
-            textEnt.geometry.computeBoundingBox();
-            var size = textEnd.geometry.boundingBox.getSize();
-            textEnt.position.x += (entity.width - size.x) / 2;
+            if (textEnt.textAlign !== 'left') {
+                textEnt.geometry.computeBoundingBox();
+                var textWidth = textEnt.geometry.boundingBox.max.x - textEnt.geometry.boundingBox.min.x;
+                if (textEnt.textAlign === 'center') textEnt.position.x += (entity.width - textWidth) / 2;
+                if (textEnt.textAlign === 'right') textEnt.position.x += (entity.width - textWidth);
+            }
         });
 
         return textEnt;
