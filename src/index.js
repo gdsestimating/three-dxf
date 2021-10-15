@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { BufferGeometry, Color, Float32BufferAttribute, Vector3 } from 'three';
 import { OrbitControls } from './OrbitControls';
 import bSpline from './bspline';
-import {Text} from 'troika-three-text'
+import { Text } from 'troika-three-text'
 import { parseDxfMTextContent } from '@dxfom/mtext';
 
 const textControlCharactersRegex = /\\[AXQWOoLIpfH].*;/g;
@@ -92,8 +92,8 @@ export function Viewer(data, parent, width, height, font) {
     // Create scene from dxf object (data)
     var i, entity, obj, min_x, min_y, min_z, max_x, max_y, max_z;
     var dims = {
-        min: { x: false, y: false, z: false },
-        max: { x: false, y: false, z: false }
+        min: { x: 0, y: 0, z: 0 },
+        max: { x: 0, y: 0, z: 0 }
     };
     for (i = 0; i < data.entities.length; i++) {
         entity = data.entities[i];
@@ -101,12 +101,12 @@ export function Viewer(data, parent, width, height, font) {
 
         if (obj) {
             var bbox = new THREE.Box3().setFromObject(obj);
-            if (bbox.min.x && ((dims.min.x === false) || (dims.min.x > bbox.min.x))) dims.min.x = bbox.min.x;
-            if (bbox.min.y && ((dims.min.y === false) || (dims.min.y > bbox.min.y))) dims.min.y = bbox.min.y;
-            if (bbox.min.z && ((dims.min.z === false) || (dims.min.z > bbox.min.z))) dims.min.z = bbox.min.z;
-            if (bbox.max.x && ((dims.max.x === false) || (dims.max.x < bbox.max.x))) dims.max.x = bbox.max.x;
-            if (bbox.max.y && ((dims.max.y === false) || (dims.max.y < bbox.max.y))) dims.max.y = bbox.max.y;
-            if (bbox.max.z && ((dims.max.z === false) || (dims.max.z < bbox.max.z))) dims.max.z = bbox.max.z;
+            if (isFinite(bbox.min.x) && (dims.min.x > bbox.min.x)) dims.min.x = bbox.min.x;
+            if (isFinite(bbox.min.y) && (dims.min.y > bbox.min.y)) dims.min.y = bbox.min.y;
+            if (isFinite(bbox.min.z) && (dims.min.z > bbox.min.z)) dims.min.z = bbox.min.z;
+            if (isFinite(bbox.max.x) && (dims.max.x < bbox.max.x)) dims.max.x = bbox.max.x;
+            if (isFinite(bbox.max.y) && (dims.max.y < bbox.max.y)) dims.max.y = bbox.max.y;
+            if (isFinite(bbox.max.z) && (dims.max.z < bbox.max.z)) dims.max.z = bbox.max.z;
             scene.add(obj);
         }
         obj = null;
@@ -263,7 +263,7 @@ export function Viewer(data, parent, width, height, font) {
 
         var txt = createTextForScene(content.text, content.style, entity, color);
         if (!txt) return null;
-        
+
         var group = new THREE.Object3D();
         group.add(txt);
         return group;
@@ -276,7 +276,7 @@ export function Viewer(data, parent, width, height, font) {
         }
 
         var text = [];
-        for(let item of textAndControlChars) {
+        for (let item of textAndControlChars) {
             if (typeof item === 'string') {
                 if (item.startsWith('pxq') && item.endsWith(';')) {
                     if (item.indexOf('c') !== -1)
@@ -397,7 +397,7 @@ export function Viewer(data, parent, width, height, font) {
 
     function drawSpline(entity, data) {
         var color = getColor(entity, data);
-        
+
         var points = getBSplinePolyline(entity.controlPoints, entity.degreeOfSplineCurve, entity.knotValues, 100);
 
         var geometry = new THREE.BufferGeometry().setFromPoints(points);
