@@ -32,7 +32,7 @@ function decodeDataUri(uri) {
  * @param  {Object} p2 end point of the vector
  * @return {Number} the angle
  */
-THREE.Math.angle2 = function (p1, p2) {
+const mathAngle2 = function (p1, p2) {
   var v1 = new THREE.Vector2(p1.x, p1.y);
   var v2 = new THREE.Vector2(p2.x, p2.y);
   v2.sub(v1); // sets v2 to be our chord
@@ -41,7 +41,7 @@ THREE.Math.angle2 = function (p1, p2) {
   return Math.acos(v2.x);
 };
 
-THREE.Math.polar = function (point, distance, angle) {
+const mathPolar = function (point, distance, angle) {
   var result = {};
   result.x = point.x + distance * Math.cos(angle);
   result.y = point.y + distance * Math.sin(angle);
@@ -70,21 +70,21 @@ THREE.BulgeGeometry = function (startPoint, endPoint, bulge, segments) {
 
   angle = 4 * Math.atan(bulge);
   radius = p0.distanceTo(p1) / 2 / Math.sin(angle / 2);
-  center = THREE.Math.polar(
+  center = mathPolar(
     startPoint,
     radius,
-    THREE.Math.angle2(p0, p1) + (Math.PI / 2 - angle / 2)
+    mathAngle2(p0, p1) + (Math.PI / 2 - angle / 2)
   );
 
   this.segments = segments =
     segments || Math.max(Math.abs(Math.ceil(angle / (Math.PI / 18))), 6); // By default want a segment roughly every 10 degrees
-  startAngle = THREE.Math.angle2(center, p0);
+  startAngle = mathAngle2(center, p0);
   thetaAngle = angle / segments;
 
   this.vertices.push(new THREE.Vector3(p0.x, p0.y, 0));
 
   for (i = 1; i <= segments - 1; i++) {
-    vertex = THREE.Math.polar(
+    vertex = mathPolar(
       center,
       Math.abs(radius),
       startAngle + thetaAngle * i
