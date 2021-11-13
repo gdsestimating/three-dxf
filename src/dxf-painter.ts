@@ -557,25 +557,40 @@ export class DXFPainter {
     return text;
   }
 
+  // private drawPoint(entity: IPointEntity, data: IDxf) {
+  //   const color = this.getColor(entity, data);
+  //   const geometry = new THREE.BufferGeometry();
+
+  //   geometry.setAttribute(
+  //     'position',
+  //     new THREE.Float32BufferAttribute(
+  //       [entity.position.x, entity.position.y, entity.position.z ?? 1],
+  //       3
+  //     )
+  //   );
+
+  //   const material = new THREE.PointsMaterial({
+  //     size: 0.1,
+  //     color: new THREE.Color(color),
+  //   });
+  //   const point = new THREE.Points(geometry, material);
+
+  //   return point;
+  // }
+
   // Draw a point like a big circle
   private drawPoint(entity: IPointEntity, data: IDxf) {
     const color = this.getColor(entity, data);
-    const geometry = new THREE.BufferGeometry();
-
-    geometry.setAttribute(
-      'position',
-      new THREE.Float32BufferAttribute(
-        [entity.position.x, entity.position.y, entity.position.z],
-        3
-      )
+    const geometry = new THREE.CircleGeometry(2, 12);
+    const material = new THREE.MeshBasicMaterial({ color: color });
+    const point = new THREE.Mesh(geometry, material);
+    point.position.set(
+      entity.position.x ?? 0,
+      entity.position.y ?? 0,
+      entity.position.z ?? 1
     );
-
-    const material = new THREE.PointsMaterial({
-      size: 0.1,
-      color: new THREE.Color(color),
-    });
-    const point = new THREE.Points(geometry, material);
-
+    point.name = 'point';
+    point.type = 'point';
     return point;
   }
 
