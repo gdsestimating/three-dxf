@@ -38,37 +38,19 @@ export class Viewer {
   constructor(
     data: IDxf,
     parent: HTMLElement,
-    height: number,
     width: number,
+    height: number,
     font: THREE.Font
   ) {
     // create DXF painter
     this.painter = new DXFPainter(font);
     this.scene = new THREE.Scene();
 
-    const dims = {
-      min: { x: 0, y: 0, z: 0 },
-      max: { x: 0, y: 0, z: 0 },
-    };
-
     for (let i = 0; i < data.entities.length; i++) {
       const entity = data.entities[i];
       let obj = this.painter.draw(entity, data);
 
       if (obj) {
-        const bbox = new THREE.Box3().setFromObject(obj);
-        if (isFinite(bbox.min.x) && dims.min.x > bbox.min.x)
-          dims.min.x = bbox.min.x;
-        if (isFinite(bbox.min.y) && dims.min.y > bbox.min.y)
-          dims.min.y = bbox.min.y;
-        if (isFinite(bbox.min.z) && dims.min.z > bbox.min.z)
-          dims.min.z = bbox.min.z;
-        if (isFinite(bbox.max.x) && dims.max.x < bbox.max.x)
-          dims.max.x = bbox.max.x;
-        if (isFinite(bbox.max.y) && dims.max.y < bbox.max.y)
-          dims.max.y = bbox.max.y;
-        if (isFinite(bbox.max.z) && dims.max.z < bbox.max.z)
-          dims.max.z = bbox.max.z;
         this.scene.add(obj);
       }
       obj = null;
@@ -79,6 +61,7 @@ export class Viewer {
 
     const aspectRatio = this.width / this.height;
 
+    const dims = new THREE.Box3().setFromObject(this.scene);
     const upperRightCorner = { x: dims.max.x, y: dims.max.y };
     const lowerLeftCorner = { x: dims.min.x, y: dims.min.y };
 
@@ -122,7 +105,7 @@ export class Viewer {
     this.camera.position.y = viewPort.center.y;
 
     this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: false,
     });
     this.renderer.setSize(this.width, this.height);
     this.renderer.setClearColor(0xfffffff, 1);
@@ -140,7 +123,7 @@ export class Viewer {
     this.controls.zoomSpeed = 3;
 
     //Uncomment this to disable rotation (does not make much sense with 2D drawings).
-    // this.controls.enableRotate = false;
+    this.controls.enableRotate = false;
 
     parent.children[0].addEventListener('pointermove', (e: PointerEvent) => {
       this.onPointerMove(e);
