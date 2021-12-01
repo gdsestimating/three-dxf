@@ -80,36 +80,33 @@ function getBulgeCurvePoints(startPoint, endPoint, bulge, segments) {
  * @param {Object} parent - the parent element to which we attach the rendering canvas
  * @param {Number} width - width of the rendering canvas in pixels
  * @param {Number} height - height of the rendering canvas in pixels
- * @param {Object} font - a font loaded with THREE.FontLoader 
+ * @param {Object} font - a font loaded with THREE.FontLoader
+ * @param {Number} margin - initial gap between entities and parent clientRect
  * @constructor
  */
-export function Viewer(data, parent, width, height, font) {
+export function Viewer(data, parent, width, height, font, margin) {
 
     createLineTypeShaders(data);
 
     var scene = new THREE.Scene();
 
     // Create scene from dxf object (data)
-    var i, entity, obj, min_x, min_y, min_z, max_x, max_y, max_z;
-    var dims = {
-        min: { x: 0, y: 0, z: 0 },
-        max: { x: 0, y: 0, z: 0 }
-    };
+    var i, entity, obj;
+
     for (i = 0; i < data.entities.length; i++) {
         entity = data.entities[i];
         obj = drawEntity(entity, data);
 
         if (obj) {
-            var bbox = new THREE.Box3().setFromObject(obj);
-            if (isFinite(bbox.min.x) && (dims.min.x > bbox.min.x)) dims.min.x = bbox.min.x;
-            if (isFinite(bbox.min.y) && (dims.min.y > bbox.min.y)) dims.min.y = bbox.min.y;
-            if (isFinite(bbox.min.z) && (dims.min.z > bbox.min.z)) dims.min.z = bbox.min.z;
-            if (isFinite(bbox.max.x) && (dims.max.x < bbox.max.x)) dims.max.x = bbox.max.x;
-            if (isFinite(bbox.max.y) && (dims.max.y < bbox.max.y)) dims.max.y = bbox.max.y;
-            if (isFinite(bbox.max.z) && (dims.max.z < bbox.max.z)) dims.max.z = bbox.max.z;
             scene.add(obj);
         }
         obj = null;
+    }
+
+    var dims = new THREE.Box3().setFromObject(scene);
+
+    if (margin && margin > 0) {
+        dims = dims.expandByScalar(margin);
     }
 
     width = width || parent.clientWidth;
