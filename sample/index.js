@@ -41,25 +41,25 @@ function abortUpload() {
 }
 
 function errorHandler(evt) {
-    switch(evt.target.error.code) {
-    case evt.target.error.NOT_FOUND_ERR:
-        alert('File Not Found!');
-        break;
-    case evt.target.error.NOT_READABLE_ERR:
-        alert('File is not readable');
-        break;
-    case evt.target.error.ABORT_ERR:
-        break; // noop
-    default:
-        alert('An error occurred reading this file.');
+    switch (evt.target.error.code) {
+        case evt.target.error.NOT_FOUND_ERR:
+            alert('File Not Found!');
+            break;
+        case evt.target.error.NOT_READABLE_ERR:
+            alert('File is not readable');
+            break;
+        case evt.target.error.ABORT_ERR:
+            break; // noop
+        default:
+            alert('An error occurred reading this file.');
     }
 }
 
 function updateProgress(evt) {
     console.log('progress');
-    console.log(Math.round((evt.loaded /evt.total) * 100));
-    if(evt.lengthComputable) {
-        var percentLoaded = Math.round((evt.loaded /evt.total) * 100);
+    console.log(Math.round((evt.loaded / evt.total) * 100));
+    if (evt.lengthComputable) {
+        var percentLoaded = Math.round((evt.loaded / evt.total) * 100);
         if (percentLoaded < 100) {
             progress.style.width = percentLoaded + '%';
             progress.textContent = percentLoaded + '%';
@@ -67,16 +67,16 @@ function updateProgress(evt) {
     }
 }
 
-function onSuccess(evt){
+function onSuccess(evt) {
     var fileReader = evt.target;
-    if(fileReader.error) return console.log("error onloadend!?");
+    if (fileReader.error) return console.log("error onloadend!?");
     progress.style.width = '100%';
     progress.textContent = '100%';
-    setTimeout(function() { $progress.classList.remove('loading'); }, 2000);
+    setTimeout(function () { $progress.classList.remove('loading'); }, 2000);
     var parser = new window.DxfParser();
     var dxf = parser.parseSync(fileReader.result);
-    
-    if(dxf) {
+
+    if (dxf) {
         dxfContentEl.innerHTML = JSON.stringify(dxf, null, 2);
     } else {
         dxfContentEl.innerHTML = 'No data.';
@@ -87,11 +87,11 @@ function onSuccess(evt){
     //  and this discussion https://github.com/mrdoob/three.js/issues/7398 
     var font;
     var loader = new THREE.FontLoader();
-    loader.load( 'fonts/helvetiker_regular.typeface.json', function ( response ) {
+    loader.load('fonts/helvetiker_regular.typeface.json', function (response) {
         font = response;
-        cadCanvas = new window.ThreeDxf.Viewer(dxf, document.getElementById('cad-view'), 1000, 800, font);
+        cadCanvas = new window.ThreeDxf.Viewer(dxf, document.getElementById('cad-view'), 1000, 800, font, 10);
     });
-    
+
 }
 
 function handleDragOver(evt) {
