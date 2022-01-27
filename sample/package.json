@@ -7,6 +7,6 @@
   "devDependencies": {},
   "dependencies": {
     "dxf-parser": "^1.0.2",
-    "three": "^0.132.2"
+    "three": "^0.137.0"
   }
 }
