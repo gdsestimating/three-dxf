@@ -43,20 +43,16 @@ After performing the steps above, you can see the example at [http://127.0.0.1:8
 
 #### Supported DXF Features
 Supports:
-* Header
 * Most LW entities (lines, polylines, circles, etc)
 * Layers
-* Some support for line types
 * Simple Text
-* Viewport
-* Splines (Quadratic and Cubic)
+* Splines
 * Ellipses
-* MText (Single line content only)
+* Text and MText (Basic multiline support available in v1.3.0 but not all formatting is supported)
  
 Does not yet support:
 * Attributes
 * 3DSolids
 * All types of Leaders
-* MText (Multi-line content is not yet supported/rendered)
 * other less common objects and entities.
 
