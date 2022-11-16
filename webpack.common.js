@@ -10,6 +10,6 @@ module.exports = {
         globalObject: 'typeof self !== \'undefined\' ? self : this'
     },
     externals: {
-        three: 'THREE'
+        three: 'three'
     },
 };
