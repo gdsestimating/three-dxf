@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from './OrbitControls';
-import { DXFLoader } from "./loader";
+import { DXFLoader } from "../loader";
 
 /**
  * Viewer class for a dxf object.

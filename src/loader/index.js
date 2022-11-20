@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { BufferGeometry, Color, Float32BufferAttribute, Vector3 } from 'three';
-import bSpline from './bspline';
 import { Text } from 'troika-three-text'
 import { parseDxfMTextContent } from '@dxfom/mtext';
 import { Base64 } from "js-base64";
 import DxfParser from "dxf-parser";
+import bSpline from './bspline';
 
 function decodeDataUri(uri) {
   if (uri) {

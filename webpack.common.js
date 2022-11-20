@@ -9,8 +9,8 @@ const path = require('path');
 
 module.exports = {
     entry: {
-        'three-dxf-loader': './src/loader.js',
-        'three-dxf-viewer': './src/viewer.js'
+        'three-dxf-loader': './src/loader/index.js',
+        'three-dxf-viewer': './src/viewer/index.js'
     },
     output: {
         filename: '[name].js',
