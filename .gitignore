@@ -4,7 +4,3 @@ private/
 typings/
 build/
 .vscode/
-*.lock
-sample/*.lock
-package-lock.json
-sample/package-lock.json
