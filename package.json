@@ -1,12 +1,13 @@
 {
   "name": "three-dxf-loader",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "description": "Cross platform DXF loader for three.js. Out of the box usable with react-three-fibre.",
   "main": "dist/three-dxf-loader.js",
+  "module": "src/Loader.js",
   "scripts": {
-    "build-dev": "webpack --mode development webpack.dev.js",
-    "build": "webpack --config webpack.prod.js",
-    "prettier": "prettier src/**/*.js --write"
+    "build-dev": "webpack -c webpack.dev.js",
+    "build": "webpack -c webpack.prod.js",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -18,43 +19,34 @@
   "homepage": "https://github.com/prolincur/three-dxf-loader",
   "author": "Prolincur Technologies (prolincur.com) and GDS Storefront Estimating (gdsestimating.com)",
   "contributors": [
-    "Ben Zuill-Smith <bzuillsmith@gmail.com>",
-    "Sourabh Soni <https://www.prolincur.com>"
+    "Sourabh Soni <https://www.prolincur.com>",
+    "Ben Zuill-Smith <bzuillsmith@gmail.com>"
   ],
   "license": "MIT",
   "files": [
     "dist/*"
   ],
   "devDependencies": {
-    "babel-eslint": "^10.1.0",
-    "babel-minify-webpack-plugin": "^0.3.1",
-    "eslint": "^7.4.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^3.1.4",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
-    "prettier": "^2.0.5",
-    "webpack": "^4.29.5",
-    "webpack-cli": "^3.2.3",
-    "webpack-merge": "^5.7.3"
+    "html-webpack-plugin": "^5.5.0",
+    "webpack": "^5.52.1",
+    "webpack-cli": "^4.8.0",
+    "webpack-merge": "^5.8.0"
+  },
+  "peerDependencies": {
+    "three": "0.x.x"
   },
   "keywords": [
     "dxf",
     "cad",
     "viewer",
-    "three",
-    "react-three-fibre",
-    "react-native",
-    "cross-platform"
+    "threejs",
+    "react-three-fiber",
+    "r3f"
   ],
-  "peerDependencies": {
-    "three": "^0.118.3"
-  },
   "dependencies": {
-    "dxf-parser": "1.0.0-alpha.2",
-    "js-base64": "^2.6.2"
+    "@dxfom/mtext": "^0.3.2",
+    "dxf-parser": "^1.1.2",
+    "js-base64": "^3.7.3",
+    "troika-three-text": "^0.42.0"
   }
 }

@@ -4,13 +4,13 @@
  */
 
 const webpack = require('webpack');
-const MinifyPlugin = require("babel-minify-webpack-plugin");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 
 module.exports = {
     entry: {
-        'three-dxf-loader': './src/Loader.js',
-        'three-dxf-viewer': './src/Viewer.js'
+        'three-dxf-loader': './src/loader.js',
+        'three-dxf-viewer': './src/viewer.js'
     },
     output: {
         filename: '[name].js',
@@ -28,9 +28,11 @@ module.exports = {
         }
     },
     plugins: [
-        new MinifyPlugin(),
+        new HtmlWebpackPlugin({
+          title: 'Production',
+        }),
 		new webpack.BannerPlugin(
-		'Copyright (c) 2021 Prolincur Technologies LLP.\nCopyright (c) 2015 GDS Storefront Estimating\nAll Rights Reserved.\n\n' +
+		'Copyright (c) 2021-22 Prolincur Technologies LLP.\nCopyright (c) 2015 GDS Storefront Estimating\nAll Rights Reserved.\n\n' +
 		'Please check the provided LICENSE file for licensing details.\n' +
 		'\n' +
 		'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,\n' +

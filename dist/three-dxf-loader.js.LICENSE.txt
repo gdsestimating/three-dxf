@@ -1,0 +1,28 @@
+/*!
+ * Copyright (c) 2021-22 Prolincur Technologies LLP.
+ * Copyright (c) 2015 GDS Storefront Estimating
+ * All Rights Reserved.
+ *
+ * Please check the provided LICENSE file for licensing details.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
+ * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
+
+/*!
+Custom build of Typr.ts (https://github.com/fredli74/Typr.ts) for use in Troika text rendering.
+Original MIT license applies: https://github.com/fredli74/Typr.ts/blob/master/LICENSE
+*/
+
+/*!
+Custom bundle of woff2otf (https://github.com/arty-name/woff2otf) with fflate
+(https://github.com/101arrowz/fflate) for use in Troika text rendering. 
+Original licenses apply: 
+- fflate: https://github.com/101arrowz/fflate/blob/master/LICENSE (MIT)
+- woff2otf.js: https://github.com/arty-name/woff2otf/blob/master/woff2otf.js (Apache2)
+*/
