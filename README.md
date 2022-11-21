@@ -19,6 +19,7 @@ import { DXFLoader } from 'three-dxf-loader'
 
 const loader = new DXFLoader();
 // loader.setFont(font); // set fonts
+loader.setEnableLayer(true); // set EnableLayer
 const scene = new THREE.Scene();
 onLoad = (data) => {
     if (data && data.entities) {

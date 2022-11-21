@@ -103,12 +103,17 @@ function getBulgeCurvePoints(startPoint, endPoint, bulge, segments) {
 	constructor( manager ) {
 		super( manager );
 		this.font = null;
-
+        this.enableLayer = false;
 	}
  
     setFont(font) {
       this.font = font;
       return this;
+    }
+
+    setEnableLayer(enableLayer) {
+        this.enableLayer = enableLayer;
+        return this;
     }
  
     load(url, onLoad, onProgress, onError) {
@@ -149,7 +154,7 @@ function getBulgeCurvePoints(startPoint, endPoint, bulge, segments) {
     parse (text) {
       const parser = new DxfParser();
       var dxf = parser.parseSync(text);
-      return this.loadEntities(dxf, this.font);
+      return this.loadEntities(dxf, this.font, this.enableLayer);
     }
 
 
@@ -158,11 +163,12 @@ function getBulgeCurvePoints(startPoint, endPoint, bulge, segments) {
      * @param {Object} font - a font loaded with THREE.FontLoader
      * @constructor
      */
-    loadEntities(data, font) {
+    loadEntities(data, font, enableLayer) {
 
         createLineTypeShaders(data);
 
         var entities = [];
+        var layers = {};
 
         // Create scene from dxf object (data)
         var i, entity, obj;
@@ -172,12 +178,21 @@ function getBulgeCurvePoints(startPoint, endPoint, bulge, segments) {
             obj = drawEntity(entity, data);
 
             if (obj) {
-                entities.push(obj);
+                entities.push(obj);                
+                if (enableLayer && obj.layer) {
+                    let layerGroup = layers[obj.layer]
+                    if (!layerGroup){
+                        layerGroup = new THREE.Group();
+                        layerGroup.name = obj.layer;      
+                        layers[obj.layer] = layerGroup;                                      
+                    }
+                    layerGroup.add(obj);                
+                }                
             }
             obj = null;
         }
         return {
-            entities: entities,
+            entities: enableLayer ? layers : entities,           
             dxf: data,
         };
     
