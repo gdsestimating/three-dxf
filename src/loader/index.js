@@ -147,7 +147,7 @@ function getBulgeCurvePoints(startPoint, endPoint, bulge, segments) {
         } else {
           console.error(error);
         }
-        scope.manager.itemError(url);
+        scope.manager.itemError(error);
       }
     }
   
@@ -178,25 +178,29 @@ function getBulgeCurvePoints(startPoint, endPoint, bulge, segments) {
             obj = drawEntity(entity, data);
 
             if (obj) {
-                entities.push(obj);                
-                if (enableLayer && obj.layer) {
-                    let layerGroup = layers[obj.layer]
+                entities.push(obj);
+                if (enableLayer && entity.layer) {
+                    let layerGroup = layers[entity.layer]
                     if (!layerGroup){
                         layerGroup = new THREE.Group();
-                        layerGroup.name = obj.layer;      
-                        layers[obj.layer] = layerGroup;                                      
+                        layerGroup.name = entity.layer;
+                        layers[entity.layer] = layerGroup;
                     }
-                    layerGroup.add(obj);                
-                }                
+                    layerGroup.add(obj);
+                }
             }
             obj = null;
         }
         return {
-            entities: enableLayer ? layers : entities,           
+            entities: enableLayer ? Object.values(layers) : entities,
             dxf: data,
         };
     
 
+        /* Entity Type
+            'POINT' | '3DFACE' | 'ARC' | 'ATTDEF' | 'CIRCLE' | 'DIMENSION' | 'MULTILEADER' | 'ELLIPSE' | 'INSERT' | 'LINE' | 
+            'LWPOLYLINE' | 'MTEXT' | 'POLYLINE' | 'SOLID' | 'SPLINE' | 'TEXT' | 'VERTEX'
+        */
         function drawEntity(entity, data) {
             var mesh;
             if (entity.type === 'CIRCLE' || entity.type === 'ARC') {
