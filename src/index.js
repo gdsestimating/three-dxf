@@ -519,7 +519,7 @@ export function Viewer(data, parent, width, height, font) {
         var arc = new THREE.Line(geometry, material);
         arc.position.x = entity.center.x;
         arc.position.y = entity.center.y;
-        arc.position.z = entity.center.z;
+        arc.position.z = entity.center.z || 0;
 
         return arc;
     }
