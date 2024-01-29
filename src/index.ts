@@ -1,121 +1,133 @@
 import * as THREE from 'three';
-import { BufferGeometry, Color, Float32BufferAttribute, Vector3 } from 'three';
-import { OrbitControls } from './OrbitControls';
-import bSpline from './bspline';
-import DxfTextLoader from './TextLoader';
-import { getColor } from './utils';
+import { BufferGeometry, Color, Float32BufferAttribute } from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import DxfTextLoader from './TextLoader.js';
+import { getColor, getBulgeCurvePoints, bSpline } from './utils.js';
+import {
+    IDxf,
+    IEntity,
+    ITextEntity,
+    IMtextEntity,
+    IEllipseEntity,
+    ISolidEntity,
+    ILineEntity,
+    ILwpolylineEntity,
+    IPolylineEntity,
+    ICircleEntity,
+    IArcEntity,
+    IPointEntity,
+    IInsertEntity,
+    IDimensionEntity,
+    ISplineEntity,
+    IPoint
+} from 'dxf-parser';
 
+type Extents = {
+    min: THREE.Vec2;
+    max: THREE.Vec2;
+}
 
-var THREEx = { Math: {} };
+// /**
+//  * Viewer class for a dxf object.
+//  * @param {Object} data - the dxf object
+//  * @param {Object} parent - the parent element to which we attach the rendering canvas
+//  * @param {Number} width - width of the rendering canvas in pixels
+//  * @param {Number} height - height of the rendering canvas in pixels
+//  * @constructor
+//  */
+// export function Viewer(
+//     data: IDxf,
+//     parent: HTMLElement,
+//     width: number,
+//     height: number,
+//     font?: string
+// ) {
 
-/**
- * Returns the angle in radians of the vector (p1,p2). In other words, imagine
- * putting the base of the vector at coordinates (0,0) and finding the angle
- * from vector (1,0) to (p1,p2).
- * @param  {Object} p1 start point of the vector
- * @param  {Object} p2 end point of the vector
- * @return {Number} the angle
- */
-THREEx.Math.angle2 = function (p1, p2) {
-    var v1 = new THREE.Vector2(p1.x, p1.y);
-    var v2 = new THREE.Vector2(p2.x, p2.y);
-    v2.sub(v1); // sets v2 to be our chord
-    v2.normalize();
-    if (v2.y < 0) return -Math.acos(v2.x);
-    return Math.acos(v2.x);
-};
+//     var scene = new THREE.Scene();
 
+//     let drawingObjects = new DxfLoader(data, font);
+//     for (let obj of drawingObjects) scene.add(obj)
 
-THREEx.Math.polar = function (point, distance, angle) {
-    var result = {};
-    result.x = point.x + distance * Math.cos(angle);
-    result.y = point.y + distance * Math.sin(angle);
-    return result;
-};
+//     width = width || parent.clientWidth;
+//     height = height || parent.clientHeight;
 
-/**
- * Calculates points for a curve between two points using a bulge value. Typically used in polylines.
- * @param startPoint - the starting point of the curve
- * @param endPoint - the ending point of the curve
- * @param bulge - a value indicating how much to curve
- * @param segments - number of segments between the two given points
- */
-function getBulgeCurvePoints(startPoint, endPoint, bulge, segments) {
+//     let extents = getExtents(drawingObjects);
+//     var camera = new THREE.OrthographicCamera();
+//     var aspectRatio = width / height;
+//     zoomExtents(extents, camera, aspectRatio);
 
-    var vertex, i,
-        center, p0, p1, angle,
-        radius, startAngle,
-        thetaAngle;
+//     var renderer = this.renderer = new THREE.WebGLRenderer();
+//     renderer.setSize(width, height);
+//     renderer.setClearColor(0xfffffff, 1);
+//     this.render = function () { renderer.render(scene, camera) };
 
-    var obj = {};
-    obj.startPoint = p0 = startPoint ? new THREE.Vector2(startPoint.x, startPoint.y) : new THREE.Vector2(0, 0);
-    obj.endPoint = p1 = endPoint ? new THREE.Vector2(endPoint.x, endPoint.y) : new THREE.Vector2(1, 0);
-    obj.bulge = bulge = bulge || 1;
+//     parent.appendChild(renderer.domElement);
 
-    angle = 4 * Math.atan(bulge);
-    radius = p0.distanceTo(p1) / 2 / Math.sin(angle / 2);
-    center = THREEx.Math.polar(startPoint, radius, THREEx.Math.angle2(p0, p1) + (Math.PI / 2 - angle / 2));
+//     useOrbitControls(camera, render.domElement, this.render);
+// }
 
-    obj.segments = segments = segments || Math.max(Math.abs(Math.ceil(angle / (Math.PI / 18))), 6); // By default want a segment roughly every 10 degrees
-    startAngle = THREEx.Math.angle2(center, p0);
-    thetaAngle = angle / segments;
+export function isTEXT(entity: IEntity): entity is ITextEntity {
+    return entity.type === 'TEXT';
+}
+export function isSOLID(entity: IEntity): entity is ISolidEntity {
+    return entity.type === 'SOLID';
+}
+export function isMTEXT(entity: IEntity): entity is IMtextEntity {
+    return entity.type === 'MTEXT';
+}
+export function isELLIPSE(entity: IEntity): entity is IEllipseEntity {
+    return entity.type === 'ELLIPSE';
+}
 
-    var vertices = [];
+export type ILine = ILineEntity | ILwpolylineEntity | IPolylineEntity;
 
-    vertices.push(new THREE.Vector3(p0.x, p0.y, 0));
+export function isPOLYLINE(
+    entity: IEntity
+): entity is IPolylineEntity | ILwpolylineEntity {
+    return entity.type === 'LWPOLYLINE' || entity.type === 'POLYLINE';
+}
 
-    for (i = 1; i <= segments - 1; i++) {
-        vertex = THREEx.Math.polar(center, Math.abs(radius), startAngle + thetaAngle * i);
-        vertices.push(new THREE.Vector3(vertex.x, vertex.y, 0));
-    }
+export function isLINE(entity: IEntity): entity is ILine {
+    return (
+        entity.type === 'LWPOLYLINE' ||
+        entity.type === 'LINE' ||
+        entity.type === 'POLYLINE'
+    );
+}
 
-    return vertices;
-};
+export type IARC = ICircleEntity | IArcEntity;
 
-/**
- * Viewer class for a dxf object.
- * @param {Object} data - the dxf object
- * @param {Object} parent - the parent element to which we attach the rendering canvas
- * @param {Number} width - width of the rendering canvas in pixels
- * @param {Number} height - height of the rendering canvas in pixels
- * @param {Object} font - a font loaded with THREE.FontLoader 
- * @constructor
- */
-export function Viewer(data, parent, width, height, font) {
+export function isARC(entity: IEntity): entity is ICircleEntity | IArcEntity {
+    return entity.type === 'ARC' || entity.type === 'CIRCLE';
+}
 
-    var scene = new THREE.Scene();
+export function isPOINT(entity: IEntity): entity is IPointEntity {
+    return entity.type === 'POINT';
+}
 
-    let drawingObjects = generateDrawingObjects(data, font);
-    for (let obj of drawingObjects) scene.add(obj)
+export function isINSERT(entity: IEntity): entity is IInsertEntity {
+    return entity.type === 'INSERT';
+}
 
-    width = width || parent.clientWidth;
-    height = height || parent.clientHeight;
+export function isDIMENSION(entity: IEntity): entity is IDimensionEntity {
+    return entity.type === 'DIMENSION';
+}
 
-    let extents = getExtents(drawingObjects);
-    var camera = new THREE.OrthographicCamera();
-    var aspectRatio = width / height;
-    zoomExtents(extents, camera, aspectRatio);
-
-    var renderer = this.renderer = new THREE.WebGLRenderer();
-    renderer.setSize(width, height);
-    renderer.setClearColor(0xfffffff, 1);
-    this.render = function () { renderer.render(scene, camera) };
-
-    parent.appendChild(renderer.domElement);
-    
-    useOrbitControls(camera, render.domElement, this.render);
+export function isSPLINE(entity: IEntity): entity is ISplineEntity {
+    return entity.type === 'SPLINE';
 }
 
 
 export class DxfLoader {
 
-    constructor(fontUrl) {
+    constructor(fontUrl: string) {
         this.textLoader = new DxfTextLoader(fontUrl);
-        
     }
 
-    load(parsedDxfData, onLoad) {
-        let drawingObjects = [];
+    textLoader: DxfTextLoader;
+
+    load(parsedDxfData: IDxf, onLoad: (drawingObjects: THREE.Object3D[]) => void) {
+        let drawingObjects: THREE.Object3D[] = [];
 
         for (let entity of parsedDxfData.entities) {
             let obj = this.drawEntity(entity, parsedDxfData);
@@ -127,27 +139,28 @@ export class DxfLoader {
         });
     }
 
-    drawEntity(entity, data) {
+    drawEntity(entity: IEntity, data: IDxf): THREE.Object3D | undefined {
         var obj;
-        if (entity.type === 'CIRCLE' || entity.type === 'ARC') {
+        if (isARC(entity)) {
             obj = this.drawArc(entity, data);
-        } else if (entity.type === 'LWPOLYLINE' || entity.type === 'LINE' || entity.type === 'POLYLINE') {
+        } else if (isLINE(entity)) {
             obj = this.drawLine(entity, data);
-        } else if (entity.type === 'TEXT') {
+        } else if (isTEXT(entity)) {
+            if (!entity.text.startsWith('# ')) return;
             obj = this.textLoader.drawText(entity, data);
-        } else if (entity.type === 'SOLID') {
+        } else if (isSOLID(entity)) {
             obj = this.drawSolid(entity, data);
-        } else if (entity.type === 'POINT') {
+        } else if (isPOINT(entity)) {
             obj = this.drawPoint(entity, data);
-        } else if (entity.type === 'INSERT') {
+        } else if (isINSERT(entity)) {
             obj = this.drawBlock(entity, data);
-        } else if (entity.type === 'SPLINE') {
+        } else if (isSPLINE(entity)) {
             obj = this.drawSpline(entity, data);
-        } else if (entity.type === 'MTEXT') {
+        } else if (isMTEXT(entity)) {
             obj = this.textLoader.drawMtext(entity, data);
-        } else if (entity.type === 'ELLIPSE') {
+        } else if (isELLIPSE(entity)) {
             obj = this.drawEllipse(entity, data);
-        } else if (entity.type === 'DIMENSION') {
+        } else if (isDIMENSION(entity)) {
             var dimTypeEnum = entity.dimensionType & 7;
             if (dimTypeEnum === 0) {
                 obj = this.drawDimension(entity, data);
@@ -162,13 +175,13 @@ export class DxfLoader {
     }
 
 
-    drawEllipse(entity, data) {
+    drawEllipse(entity: IEllipseEntity, data: IDxf): THREE.Object3D | undefined {
         var color = getColor(entity, data);
-    
+
         var xrad = Math.sqrt(Math.pow(entity.majorAxisEndPoint.x, 2) + Math.pow(entity.majorAxisEndPoint.y, 2));
         var yrad = xrad * entity.axisRatio;
         var rotation = Math.atan2(entity.majorAxisEndPoint.y, entity.majorAxisEndPoint.x);
-    
+
         var curve = new THREE.EllipseCurve(
             entity.center.x, entity.center.y,
             xrad, yrad,
@@ -176,74 +189,80 @@ export class DxfLoader {
             false, // Always counterclockwise
             rotation
         );
-    
+
         var points = curve.getPoints(50);
         var geometry = new THREE.BufferGeometry().setFromPoints(points);
         var material = new THREE.LineBasicMaterial({ linewidth: 1, color: color });
-    
+
         // Create the final object to add to the scene
         var ellipse = new THREE.Line(geometry, material);
         return ellipse;
     }
-    
-    drawSpline(entity, data) {
+
+    drawSpline(entity: ISplineEntity, data: IDxf): THREE.Object3D | undefined {
         var color = getColor(entity, data);
-    
+
+        if (!entity.controlPoints) {
+            console.log('entity missing control points.');
+            return;
+        }
+
         var points = getBSplinePolyline(entity.controlPoints, entity.degreeOfSplineCurve, entity.knotValues, 100);
-    
+
         var geometry = new THREE.BufferGeometry().setFromPoints(points);
         var material = new THREE.LineBasicMaterial({ linewidth: 1, color: color });
         var splineObject = new THREE.Line(geometry, material);
-    
+
         return splineObject;
     }
-    
-    drawLine(entity, data) {
-        let points = [];
-        let color = getColor(entity, data);
-        var material, lineType, vertex, startPoint, endPoint, bulgeGeometry,
-            bulge, i, line;
-    
-        if (!entity.vertices) return console.log('entity missing vertices.');
-    
+
+    drawLine(entity: ILine, data: IDxf): THREE.Line | undefined {
+        const points = [];
+        const color = getColor(entity, data);
+        let material, lineType;
+
+        if (!entity.vertices) {
+            console.log('entity missing vertices.');
+            return;
+        }
+
         // create geometry
-        for (i = 0; i < entity.vertices.length; i++) {
-    
-            if (entity.vertices[i].bulge) {
-                bulge = entity.vertices[i].bulge;
-                startPoint = entity.vertices[i];
-                endPoint = i + 1 < entity.vertices.length ? entity.vertices[i + 1] : points[0];
-    
-                let bulgePoints = getBulgeCurvePoints(startPoint, endPoint, bulge);
-    
+        for (let i = 0; i < entity.vertices.length; i++) {
+
+            if (isPOLYLINE(entity) && entity.vertices[i].bulge) {
+                const bulge = entity.vertices[i].bulge;
+                const startPoint = entity.vertices[i];
+                const endPoint = i + 1 < entity.vertices.length ? entity.vertices[i + 1] : points[0];
+
+                const bulgePoints = getBulgeCurvePoints(startPoint, endPoint, bulge);
+
                 points.push.apply(points, bulgePoints);
             } else {
-                vertex = entity.vertices[i];
+                const vertex = entity.vertices[i];
                 points.push(new THREE.Vector3(vertex.x, vertex.y, 0));
             }
-    
+
         }
-        if (entity.shape) points.push(points[0]);
-    
-    
+        if (isPOLYLINE(entity) && entity.shape) points.push(points[0]);
+
+
         // set material
         if (entity.lineType) {
             lineType = data.tables.lineType.lineTypes[entity.lineType];
         }
-    
+
         if (lineType && lineType.pattern && lineType.pattern.length !== 0) {
             material = new THREE.LineDashedMaterial({ color: color, gapSize: 4, dashSize: 4 });
         } else {
             material = new THREE.LineBasicMaterial({ linewidth: 1, color: color });
         }
-    
+
         var geometry = new BufferGeometry().setFromPoints(points);
-    
-        line = new THREE.Line(geometry, material);
-        return line;
+
+        return new THREE.Line(geometry, material);
     }
-    
-    drawArc(entity, data) {
+
+    drawArc(entity: ICircleEntity | IArcEntity, data: IDxf): THREE.Object3D {
         var startAngle, endAngle;
         if (entity.type === 'CIRCLE') {
             startAngle = entity.startAngle || 0;
@@ -252,61 +271,61 @@ export class DxfLoader {
             startAngle = entity.startAngle;
             endAngle = entity.endAngle;
         }
-    
+
         var curve = new THREE.ArcCurve(
             0, 0,
             entity.radius,
             startAngle,
             endAngle);
-    
+
         var points = curve.getPoints(32);
         var geometry = new THREE.BufferGeometry().setFromPoints(points);
-    
+
         var material = new THREE.LineBasicMaterial({ color: getColor(entity, data) });
-    
+
         var arc = new THREE.Line(geometry, material);
         arc.position.x = entity.center.x;
         arc.position.y = entity.center.y;
         arc.position.z = entity.center.z;
-    
+
         return arc;
     }
-    
-    drawSolid(entity, data) {
-        var material, verts,
-            geometry = new THREE.BufferGeometry();
-    
-        var points = entity.points;
+
+    drawSolid(entity: ISolidEntity, data: IDxf): THREE.Object3D {
+        const points = entity.points;
         // verts = geometry.vertices;
-        verts = [];
+        const verts: Array<THREE.Vector3> = [];
         addTriangleFacingCamera(verts, points[0], points[1], points[2]);
         addTriangleFacingCamera(verts, points[1], points[2], points[3]);
-    
-        material = new THREE.MeshBasicMaterial({ color: getColor(entity, data) });
+
+        const material = new THREE.MeshBasicMaterial({
+            color: getColor(entity, data),
+        });
+        const geometry = new THREE.BufferGeometry();
         geometry.setFromPoints(verts);
-    
+
         return new THREE.Mesh(geometry, material);
     }
-    
-    
-    drawPoint(entity, data) {
+
+
+    drawPoint(entity: IPointEntity, data: IDxf): THREE.Object3D {
         var geometry, material, point;
-    
+
         geometry = new THREE.BufferGeometry();
-    
+
         geometry.setAttribute('position', new Float32BufferAttribute([entity.position.x, entity.position.y, entity.position.z], 3));
-    
+
         var color = getColor(entity, data);
-    
+
         material = new THREE.PointsMaterial({ size: 0.1, color: new Color(color) });
         point = new THREE.Points(geometry, material);
         return point;
-    }  
+    }
 
-    drawDimension(entity, data) {
+    drawDimension(entity: IDimensionEntity, data: IDxf): THREE.Object3D | undefined {
         var block = data.blocks[entity.block];
 
-        if (!block || !block.entities) return null;
+        if (!block || !block.entities) return;
 
         var group = new THREE.Object3D();
         // if(entity.anchorPoint) {
@@ -316,17 +335,17 @@ export class DxfLoader {
         // }
 
         for (var i = 0; i < block.entities.length; i++) {
-            var childEntity = this.drawEntity(block.entities[i], data, group);
+            var childEntity = this.drawEntity(block.entities[i], data);
             if (childEntity) group.add(childEntity);
         }
 
         return group;
     }
 
-    drawBlock(entity, data) {
+    drawBlock(entity:IInsertEntity, data: IDxf) :THREE.Object3D | undefined {
         var block = data.blocks[entity.name];
 
-        if (!block.entities) return null;
+        if (!block.entities) return;
 
         var group = new THREE.Object3D()
 
@@ -344,7 +363,7 @@ export class DxfLoader {
         }
 
         for (var i = 0; i < block.entities.length; i++) {
-            var childEntity = this.drawEntity(block.entities[i], data, group);
+            var childEntity = this.drawEntity(block.entities[i], data);
             if (childEntity) group.add(childEntity);
         }
 
@@ -352,17 +371,22 @@ export class DxfLoader {
     }
 }
 
-function addTriangleFacingCamera(verts, p0, p1, p2) {
+function addTriangleFacingCamera(
+    verts: Array<THREE.Vector3>,
+    p0: IPoint,
+    p1: IPoint,
+    p2: IPoint
+) {
     // Calculate which direction the points are facing (clockwise or counter-clockwise)
-    var vector1 = new Vector3();
-    var vector2 = new Vector3();
-    vector1.subVectors(p1, p0);
-    vector2.subVectors(p2, p0);
-    vector1.cross(vector2);
+    var vector1 = new THREE.Vector3();
+    var vector2 = new THREE.Vector3();
+    const v0 = new THREE.Vector3(p0.x, p0.y, p0.z);
+    const v1 = new THREE.Vector3(p1.x, p1.y, p1.z);
+    const v2 = new THREE.Vector3(p2.x, p2.y, p2.z);
 
-    var v0 = new Vector3(p0.x, p0.y, p0.z);
-    var v1 = new Vector3(p1.x, p1.y, p1.z);
-    var v2 = new Vector3(p2.x, p2.y, p2.z);
+    vector1.subVectors(v1, v0);
+    vector2.subVectors(v2, v0);
+    vector1.cross(vector2);
 
     // If z < 0 then we must draw these in reverse order
     if (vector1.z < 0) {
@@ -383,7 +407,13 @@ function addTriangleFacingCamera(verts, p0, p1, p2) {
  * @param knots the knot vector
  * @returns the polyline
  */
-function getBSplinePolyline(controlPoints, degree, knots, interpolationsPerSplineSegment, weights) {
+function getBSplinePolyline(
+    controlPoints: IPoint[],
+    degree: number,
+    knots: number[],
+    interpolationsPerSplineSegment: number,
+    weights?: number[]
+) {
     const polyline = []
     const controlPointsForLib = controlPoints.map(function (p) {
         return [p.x, p.y]
@@ -415,11 +445,7 @@ function getBSplinePolyline(controlPoints, degree, knots, interpolationsPerSplin
     return polyline
 }
 
-export function setViewFromDxf() {
-    
-}
-
-export function useOrbitControls(camera, rendererDomElement, render, allowRotate = false) {
+export function useOrbitControls(camera: THREE.Camera, rendererDomElement: any, render: () => void, allowRotate: boolean = false) {
     var controls = new OrbitControls(camera, rendererDomElement);
     controls.target.x = camera.position.x;
     controls.target.y = camera.position.y;
@@ -430,7 +456,7 @@ export function useOrbitControls(camera, rendererDomElement, render, allowRotate
     controls.update(); // fires the change event
 }
 
-export function getExtents(drawingObjects) {
+export function getExtents(drawingObjects: THREE.Object3D[]) {
     let extents = {
         min: { x: -Infinity, y: -Infinity, z: -Infinity },
         max: { x: Infinity, y: Infinity, z: Infinity }
@@ -450,7 +476,7 @@ export function getExtents(drawingObjects) {
     return extents;
 }
 
-export function zoomToExtents(camera, extents, aspectRatio) {
+export function zoomToExtents(camera: THREE.OrthographicCamera, extents: Extents, aspectRatio: number) {
     var upperRightCorner = { x: extents.max.x, y: extents.max.y };
     var lowerLeftCorner = { x: extents.min.x, y: extents.min.y };
 

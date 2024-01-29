@@ -1,18 +1,27 @@
 import { Text } from "troika-three-text";
-import { getColor } from "./utils";
+import { getColor } from "./utils.js";
 import { parseDxfMTextContent } from '@dxfom/mtext';
 import * as THREE from 'three';
+import { IDxf, IMtextEntity, ITextEntity } from 'dxf-parser';
+import { ITextLoader } from "./core.js";
+
+type TextStyle = {
+    horizontalAlignment: string,
+    textHeight: number
+}
 
 /**
  * We need this class to help manage the async loading of the font file and the async creation of the text mesh.
  * All text should be created through a single instance and then the waitForTextToBeReady() method should be called
  */
-export default class DxfTextLoader {
-    constructor(fontUrl) {
+export default class DxfTextLoader implements ITextLoader {
+    constructor(fontUrl: string) {
         this.fontUrl = fontUrl;
     }
 
-    _textPromises = [];
+    fontUrl: string;
+
+    _textPromises: Promise<void>[] = [];
 
     /**
      * Generates a mesh object for the given text entity
@@ -20,13 +29,13 @@ export default class DxfTextLoader {
      * @param {object} dxf - the DXF data object
      * @returns The Mesh object
      */
-    drawText(entity, dxf) {
+    drawText(entity: ITextEntity, dxf: IDxf) {
         let color = getColor(entity, dxf);
 
         let textEnt = new Text();
         textEnt.text = entity.text;
         textEnt.font = this.fontUrl;
-        textEnt.fontSize = entity.height || 12;
+        textEnt.fontSize = entity.textHeight || 12;
         textEnt.position.x = entity.startPoint.x;
         textEnt.position.y = entity.startPoint.y;
         textEnt.position.z = entity.startPoint.z;
@@ -34,11 +43,7 @@ export default class DxfTextLoader {
         if (entity.rotation) {
             textEnt.rotation.z = entity.rotation * Math.PI / 180;
         }
-        if (entity.directionVector) {
-            var dv = entity.directionVector;
-            textEnt.rotation.z = new THREE.Vector3(1, 0, 0).angleTo(new THREE.Vector3(dv.x, dv.y, dv.z));
-        }
-        
+
         this._textPromises.push(new Promise((resolve, reject) => {
             textEnt.sync(() => {
                 resolve();
@@ -47,18 +52,18 @@ export default class DxfTextLoader {
         return textEnt;
     }
 
-    drawMtext(entity, data) {
-        var color = getColor(entity, data);
-    
-        var textAndControlChars = parseDxfMTextContent(entity.text);
-    
+    drawMtext(entity: IMtextEntity, data: IDxf): THREE.Object3D | undefined {
+        const color = getColor(entity, data);
+
+        const textAndControlChars = parseDxfMTextContent(entity.text);
+
         //Note: We currently only support a single format applied to all the mtext text
-        var content = this._mtextContentAndFormattingToTextAndStyle(textAndControlChars, entity, color);
-    
-        var txt = this._createTextForScene(content.text, content.style, entity, color);
-        if (!txt) return null;
-    
-        var group = new THREE.Object3D();
+        const content = this._mtextContentAndFormattingToTextAndStyle(textAndControlChars, entity, color);
+
+        const txt = this._createTextForScene(content.text, content.style, entity, color);
+        if (!txt) return;
+
+        const group = new THREE.Object3D();
         group.add(txt);
         return group;
     }
@@ -70,12 +75,15 @@ export default class DxfTextLoader {
         return Promise.all(this._textPromises);
     }
 
-    _mtextContentAndFormattingToTextAndStyle(textAndControlChars, entity, color) {
+    _mtextContentAndFormattingToTextAndStyle(
+        textAndControlChars: any,
+        entity: IMtextEntity,
+        color: number): { text: string, style: TextStyle } {
         let activeStyle = {
             horizontalAlignment: 'left',
             textHeight: entity.height
         }
-    
+
         var text = [];
         for (let item of textAndControlChars) {
             if (typeof item === 'string') {
@@ -107,15 +115,15 @@ export default class DxfTextLoader {
             style: activeStyle
         }
     }
-    
-    _createTextForScene(text, style, entity, color) {
+
+    _createTextForScene(text: string, style: TextStyle, entity: IMtextEntity, color: number) {
         if (!text) return null;
-    
+
         let textEnt = new Text();
         textEnt.text = text
             .replaceAll('\\P', '\n')
             .replaceAll('\\X', '\n');
-    
+
         textEnt.font = this.fontUrl;
         textEnt.fontSize = style.textHeight;
         textEnt.maxWidth = entity.width;
@@ -147,7 +155,7 @@ export default class DxfTextLoader {
                 textEnt.anchorX = 'right';
                 textEnt.anchorY = 'top';
                 break;
-    
+
             case 4:
                 // Middle Left
                 textEnt.anchorX = 'left';
@@ -163,7 +171,7 @@ export default class DxfTextLoader {
                 textEnt.anchorX = 'right';
                 textEnt.anchorY = 'middle';
                 break;
-    
+
             case 7:
                 // Bottom Left
                 textEnt.anchorX = 'left';
@@ -179,11 +187,11 @@ export default class DxfTextLoader {
                 textEnt.anchorX = 'right';
                 textEnt.anchorY = 'bottom';
                 break;
-    
+
             default:
                 return undefined;
         };
-    
+
         this._textPromises.push(new Promise((resolve, reject) => {
             textEnt.sync(() => {
                 if (textEnt.textAlign !== 'left') {
@@ -195,8 +203,8 @@ export default class DxfTextLoader {
                 resolve();
             });
         }));
-    
+
         return textEnt;
     }
-    
+
 }
